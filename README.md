@@ -1,4 +1,4 @@
-# Buzz Radar AI Apps
+# 🤖 Buzz Radar AI Apps
 Repository for AI apps, client and server side
 
 Requirements
