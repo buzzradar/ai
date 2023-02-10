@@ -1,0 +1,12 @@
+client/node_modules
+server/node_modules
+server/.env
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
