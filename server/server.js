@@ -8,7 +8,7 @@ app.use(express.json());
 
 app.get("/", async (req, res) => {
 	res.status(200).send({
-		message: "Yeah man! Hello!",
+		message: "Hello from Buzz AI server v2",
 	});
 });
 
