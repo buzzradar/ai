@@ -1,9 +1,14 @@
 import { uniqueId } from "lodash";
-import bot from "./assets/bot.svg";
+import bot from "./assets/ibot.png";
 import user from "./assets/user.svg";
 
 const form = document.querySelector("form");
 const chatContainer = document.querySelector("#chat_container");
+
+const server = "http://localhost:7347/";
+// const server = "https://ai-gmed.onrender.com/";
+
+console.log("%c ➜ ", "background:#93f035;", "server:", server);
 
 let loadInterval;
 
@@ -52,10 +57,10 @@ const handleSubmit = async (e) => {
 	e.preventDefault();
 
 	const data = new FormData(form);
-    const userPrompt = data.get("prompt");
+	const userPrompt = data.get("prompt");
 
-    console.log ("%c ➜ ", "background:#00FFbc;", "userPrompt:", userPrompt);
-    
+	console.log("%c ➜ ", "background:#00FFbc;", "userPrompt:", userPrompt);
+
 	// user's chatstripe
 	chatContainer.innerHTML += chatStripe(false, userPrompt);
 
@@ -76,7 +81,7 @@ const handleSubmit = async (e) => {
 	// messageDiv.innerHTML = "..."
 	loader(messageDiv);
 
-	const response = await fetch("http://localhost:7347/codex", {
+	const response = await fetch(server + "codex", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -97,15 +102,19 @@ const handleSubmit = async (e) => {
 	} else {
 		const err = await response.text();
 
-		messageDiv.innerHTML = "Something went wrong";
-		alert(err);
+		// http://localhost:7347/codex 503 (Service Unavailable)
+
+		const {error, statusText} = err;
+
+		messageDiv.innerHTML = "Something went wrong: "+error+" "+statusText;
+		console.log (err);
 	}
 };
 
 form.addEventListener("submit", handleSubmit);
 
 form.addEventListener("keyup", (e) => {
-	if (e.keyCode === 13) {
+	if (e.keyCode == 13) {
 		handleSubmit(e);
 	}
 });
