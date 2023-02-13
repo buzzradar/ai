@@ -2,7 +2,7 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
 	server: {
-		open: "index.html",
-		base: ''
+		open: "index.html"
 	},
+	base: ''
 });
