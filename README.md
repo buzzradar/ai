@@ -37,5 +37,5 @@ OPENAI_API_KEY = XXXX
 3. `npm run server`
 4. to deploy update on github
 5. update on https://dashboard.render.com/
-6. server is here https://ai-gmed.onrender.com/
+6. server is here https://ai-gmed.onrender.com/npm
 

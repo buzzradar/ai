@@ -4,11 +4,12 @@ import user from "./assets/user.svg";
 
 const form = document.querySelector("form");
 const chatContainer = document.querySelector("#chat_container");
+const version = "0.1.0";
 
-const server = "http://localhost:7347/";
-// const server = "https://ai-gmed.onrender.com/";
+// const server = "http://localhost:7347/";
+const server = "https://ai-gmed.onrender.com/";
 
-console.log("%c ➜ ", "background:#93f035;", "server:", server);
+console.log("%c ➜ ", "background:#93f035;", "ibot version:", version, "server:", server);
 
 let loadInterval;
 
@@ -59,8 +60,6 @@ const handleSubmit = async (e) => {
 	const data = new FormData(form);
 	const userPrompt = data.get("prompt");
 
-	console.log("%c ➜ ", "background:#00FFbc;", "userPrompt:", userPrompt);
-
 	// user's chatstripe
 	chatContainer.innerHTML += chatStripe(false, userPrompt);
 
@@ -81,7 +80,20 @@ const handleSubmit = async (e) => {
 	// messageDiv.innerHTML = "..."
 	loader(messageDiv);
 
-	const response = await fetch(server + "codex", {
+	const { success, content } = await fetchOpenAI(userPrompt);
+
+	clearInterval(loadInterval);
+	messageDiv.innerHTML = " ";
+
+	if (success) {
+		typeText(messageDiv, content);
+	} else {
+		messageDiv.innerHTML = content;
+	}
+};
+
+async function fetchOpenAI(userPrompt) {
+	var response = await fetch(server + "codex", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -91,25 +103,26 @@ const handleSubmit = async (e) => {
 		}),
 	});
 
-	clearInterval(loadInterval);
-	messageDiv.innerHTML = " ";
+	const { ok } = response;
 
-	if (response.ok) {
-		const data = await response.json();
-		const parsedData = data.bot.trim(); // trims any trailing spaces/'\n'
+	var success = false;
+	var content = null;
 
-		typeText(messageDiv, parsedData);
+	if (ok) {
+		console.log("%c ➜ ", "background:#00FFbc;", "openAI server success:", response);
+		success = true;
+		let data = await response.json();
+		content = data.bot.trim(); // trims any trailing spaces/'\n'
 	} else {
-		const err = await response.text();
-
-		// http://localhost:7347/codex 503 (Service Unavailable)
-
-		const {error, statusText} = err;
-
-		messageDiv.innerHTML = "Something went wrong: "+error+" "+statusText;
-		console.log (err);
+		console.log("%c ➜ ", "background:#ff1cbc;", "openAI server fail:", response);
+		content = "Sorry, something went wrong, please try again later - " + response.statusText + " " + response.status;
 	}
-};
+
+	return {
+		success: success,
+		content: content,
+	};
+}
 
 form.addEventListener("submit", handleSubmit);
 

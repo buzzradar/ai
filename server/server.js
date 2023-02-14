@@ -6,9 +6,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const version = "0.0.1";
+
 app.get("/", async (req, res) => {
 	res.status(200).send({
-		message: "Hello from Buzz AI server v2",
+		message: "Hello! Buzz AI server v" + version + " is running.",
 	});
 });
 
