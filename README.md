@@ -7,13 +7,14 @@ Requirements
 ------------
 1. NodeJs (use nvm to install) https://www.linode.com/docs/guides/how-to-install-use-node-version-manager-nvm/
 2. npm (comes with NodeJs)
+3. git clone this repo
+4. git checkout develop
 
 Installing dependencies
 --------------------------------------
 
-1. git clone this repo
-2. "frontend" cd into client/.. e.g. "ibot"
-3. "backend" cd into server
+1. "frontend" cd into client/.. e.g. "ibot"
+2. "backend" cd into server
 3. `npm install`
 
 Running the project client side
@@ -21,10 +22,9 @@ https://vitejs.dev/config/
 --------------------------------------
 
 1. go in respective project, e.g. client/ibot
-2. go in respective project, e.g. client/ibot
-3. `npm run dev`
-4. to dist `npm run build` https://vitejs.dev/guide/static-deploy.html
-5. to preview `npm run preview`
+2. `npm run dev`
+3. to dist `npm run build` https://vitejs.dev/guide/static-deploy.html
+4. to preview `npm run preview`
 
 Running the project server side
 --------------------------------------
