@@ -10,12 +10,14 @@ const server = "http://localhost:7347/";
 var tweets_LIST = [];
 
 var app_DIV = document.getElementById("app");
+var tweet_regenerate = null;
+var isRenegerating = false; // avoid multiple requests spamming the server
 
 var initTweetRewordRow = (tweet_JSON) => {
 	let tweet_OBJ = getTweetObject(tweet_JSON);
 	addTweetView(tweet_OBJ);
 
-	tweets_LIST.push({ orignal: tweet_OBJ, id: tweet_OBJ.id, regeneratedView: null });
+	tweets_LIST.push({ original: tweet_OBJ, id: tweet_OBJ.id, regeneratedView: null });
 };
 
 var getTweetObject = (tweet_JSON) => {
@@ -48,8 +50,15 @@ var addTweetView = (tweet_OBJ) => {
 };
 
 var regenerateTweet = (id) => {
-	var tweet = tweets_LIST.find((x) => x.id == id);
-	console.log("%c ➜ ", "background:#00FFbc;", "regenerateTweet:", tweet);
+	if (!isRenegerating) {
+		isRenegerating = true; // avoid multiple requests spamming the server
+		tweet_regenerate = getTweetById(id);
+		console.log("%c ➜ ", "background:#00FFbc;", "regenerateTweet:", tweet_regenerate);
+	}
+};
+
+var getTweetById = (id) => {
+	return tweets_LIST.find((x) => x.id == id);
 };
 
 chart.chart_data.forEach((tweet_JSON) => {
