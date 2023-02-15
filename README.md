@@ -3,7 +3,7 @@ Repository for AI apps, client and server side
 
 Based on: https://www.youtube.com/watch?v=2FeymQoKvrk
 
-Requirements
+Requirements release test
 ------------
 1. NodeJs (use nvm to install) https://www.linode.com/docs/guides/how-to-install-use-node-version-manager-nvm/
 2. npm (comes with NodeJs)
