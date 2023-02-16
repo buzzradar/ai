@@ -2,10 +2,7 @@ import express from "express";
 import * as dotenv from 'dotenv';
 import cors from "cors";
 import codexRouter from "./routes/codex.js";
-import cnlRouter from "./routes/cnl.js";
 // import fakeprofileRouter from "./routes/fakeprofile";
-
-dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -21,7 +18,6 @@ app.get("/", async (req, res) => {
 
 
 app.use ("/codex", codexRouter);
-app.use ("/cnl", cnlRouter);
 // app.use ("/fakeprofile", fakeprofileRouter);
 
 function displayServer(){

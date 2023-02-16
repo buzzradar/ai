@@ -1,4 +1,5 @@
 node_modules
+randomFace
 .env
 .vscode/*
 !.vscode/extensions.json
