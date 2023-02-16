@@ -1,10 +1,10 @@
 import { uniqueId } from "lodash";
-import bot from "./assets/ibot.png";
-import user from "./assets/user.svg";
+import bot from "./assets/helloCat.png";
+import user from "./assets/user.png";
 
 const form = document.querySelector("form");
 const chatContainer = document.querySelector("#chat_container");
-const version = "0.1.0";
+const version = "0.1.1";
 
 // const server = "http://localhost:7347/";
 const server = "https://ai-gmed.onrender.com/";

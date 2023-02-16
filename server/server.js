@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import codexRouter from "./routes/codex.js";
+// import fakeprofileRouter from "./routes/fakeprofile";
 
 const app = express();
 app.use(cors());
@@ -16,5 +17,6 @@ app.get("/", async (req, res) => {
 
 
 app.use ("/codex", codexRouter);
+// app.use ("/fakeprofile", fakeprofileRouter);
 
 app.listen(7347, () => console.log("AI server started on http://localhost:7347"));
