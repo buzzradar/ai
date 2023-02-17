@@ -5,9 +5,11 @@ const form = document.querySelector("form");
 const resultContainer = document.querySelector("#result_container");
 const version = "0.0.1";
 
-const server = "http://localhost:7347/";
-// const server = "https://ai-gmed.onrender.com/";
 
+var server = "http://localhost:7347/";
+if (process.env.NODE_ENV === 'production') {
+	server = "https://cnl.onrender.com";
+}
 console.log("%c ➜ ", "background:#93f035;", "CNL version:", version, "server:", server);
 
 const handleSubmit = async (e) => {
