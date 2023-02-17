@@ -15,18 +15,18 @@ const client = new LanguageServiceClient({
 router.post('/', async (req, res) => {
     
     try {
-
+        
         const document = {
             content: "Hello world, how are you doing!",
             type: 'PLAIN_TEXT',
         };
 
         // Detects the sentiment of the text
-        const [result] = await client.analyzeSentiment({ document: document });
+        const [result] = await client.analyzeSentiment({ document });
         const sentiment = result.documentSentiment;
 
         res.status(200).json({
-            text: text,
+            text: document.content,
             sentiment: {
                 score: sentiment.score,
                 magnitude: sentiment.magnitude,
