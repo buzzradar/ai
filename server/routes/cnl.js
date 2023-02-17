@@ -15,23 +15,34 @@ const client = new LanguageServiceClient({
 router.post('/', async (req, res) => {
     
     try {
-        
         const document = {
-            content: "Hello world, how are you doing!",
+            content: req.body.copyToAnalyse,
             type: 'PLAIN_TEXT',
         };
 
-        // Detects the sentiment of the text
-        const [result] = await client.analyzeSentiment({ document });
-        const sentiment = result.documentSentiment;
+        // The encoding type of the text, default is UTF8
+        const encodingType = 'UTF8';
+
+        // The features to extract from the text
+        const features = {
+            extractSyntax: false,
+            extractEntities: false,
+            extractDocumentSentiment: true,
+            extractEntitySentiment: true,
+            classifyText: true,
+        };
+
+        const [result] = await client.annotateText({
+            document: {content: document.content, type: 'PLAIN_TEXT', language: 'en'}, 
+            features: features, 
+            encodingType: encodingType
+        });
+
 
         res.status(200).json({
-            text: document.content,
-            sentiment: {
-                score: sentiment.score,
-                magnitude: sentiment.magnitude,
-            },
+            result: result,
         });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'ERROR: ' + err });

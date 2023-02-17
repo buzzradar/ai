@@ -21,6 +21,12 @@ const handleSubmit = async (e) => {
 
 	const { success, resultFromGoogle } = await fetchCNL(copyToAnalyse);
 	result_container.innerHTML = JSON.stringify(resultFromGoogle, undefined, 2);
+
+	var sentimentColumn = document.querySelector('.sentiment-col p');
+	sentimentColumn.innerHTML = "<strong>Sentiment: </strong>"+resultFromGoogle.result.documentSentiment.score+"<br><strong>Magnitude: </strong>"+resultFromGoogle.result.documentSentiment.magnitude;
+
+	var categoriesColumn = document.querySelector('.categories-col p');
+	categoriesColumn.innerHTML = JSON.stringify(resultFromGoogle.result.categories, undefined, 2);;
 	
 };
 
