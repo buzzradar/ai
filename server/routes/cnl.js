@@ -3,6 +3,9 @@ const router = express.Router();
 import { LanguageServiceClient } from "@google-cloud/language";
 //import lunarArcJSON from '../apiKeys/lunar-arc-378014-d3455e8e0581.json' assert { type: "json" };
 
+console.log("GOOGLE KEY CHECK....");
+console.log(process.env.GOOGLE_CLOUD_KEY);
+
 // Creates a client
 const client = new LanguageServiceClient({
     credentials: JSON.parse(process.env.GOOGLE_CLOUD_KEY)
