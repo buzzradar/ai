@@ -1,0 +1,13 @@
+{
+  "hash": "a8f803f6",
+  "browserHash": "dc1029b2",
+  "optimized": {
+    "lodash": {
+      "src": "../../node_modules/lodash/lodash.js",
+      "file": "lodash.js",
+      "fileHash": "4efa2abf",
+      "needsInterop": true
+    }
+  },
+  "chunks": {}
+}
