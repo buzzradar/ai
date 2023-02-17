@@ -24,4 +24,4 @@ app.use ("/codex", codexRouter);
 app.use ("/cnl", cnlRouter);
 // app.use ("/fakeprofile", fakeprofileRouter);
 
-app.listen(7347, () => console.log("AIIII server started on http://localhost:7347"));
+app.listen(7347, () => console.log("AI server started on http://localhost:7347"));
