@@ -1,12 +1,12 @@
 import express from "express";
 const router = express.Router();
 import { LanguageServiceClient } from "@google-cloud/language";
-//import { jsonFileFromGoogle } from '../lunar-arc-378014-d3455e8e0581.json';
+import { jsonFileFromGoogle } from '../lunar-arc-378014-d3455e8e0581.json';
 
 
 // Creates a client
 const client = new LanguageServiceClient({
-    credentials: '../lunar-arc-378014-d3455e8e0581.json',
+    credentials: jsonFileFromGoogle,
 });
 
 console.log("JSON KEY FROM GOOGLE SERVICES :", process.env.GOOGLE_APPLICATION_CREDENTIALS);
