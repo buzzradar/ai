@@ -16,7 +16,7 @@ client/cnl/node_modules
 client/cnl/google-cloud-sdk
 client/cnl/lunar-arc-378014-d3455e8e0581.json
 server/lunar-arc-378014-d3455e8e0581.json
-
+client/cnl/dist
 
 **/.DS_Store
 randomFace
