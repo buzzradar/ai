@@ -9,8 +9,9 @@ const client = new LanguageServiceClient({
     credentials: jsonFileFromGoogle,
 });
 
-console.log("JSON KEY FROM GOOGLE SERVICES :", process.env.GOOGLE_APPLICATION_CREDENTIALS);
-console.log("Client------- :", client.auth);
+//console.log("JSON KEY FROM GOOGLE SERVICES :", process.env.GOOGLE_APPLICATION_CREDENTIALS);
+//console.log("JSON Content :", jsonFileFromGoogle);
+//console.log("Client------- :", client.auth);
 
 
 
