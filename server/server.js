@@ -2,7 +2,10 @@ import express from "express";
 import * as dotenv from 'dotenv';
 import cors from "cors";
 import codexRouter from "./routes/codex.js";
+import cnlRouter from "./routes/cnl.js";
 // import fakeprofileRouter from "./routes/fakeprofile";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -18,14 +21,7 @@ app.get("/", async (req, res) => {
 
 
 app.use ("/codex", codexRouter);
+app.use ("/cnl", cnlRouter);
 // app.use ("/fakeprofile", fakeprofileRouter);
 
-function displayServer(){
-	var server = "http://localhost:7347/";
-	if (process.env.NODE_ENV === 'production') {
-		server = "https://cnl.onrender.com/";
-	}
-	console.log("AI server started on " + server);
-}
-
-app.listen(7347, () => displayServer() );
+app.listen(7347, () => console.log("AI server started on http://localhost:7347"));

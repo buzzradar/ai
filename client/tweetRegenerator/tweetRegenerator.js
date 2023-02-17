@@ -81,15 +81,22 @@ var regenerateTweet = (tweetRegenerate_ROW) => {
 async function getRegenerated_OBJ() {
 	var regenerated_OBJ = initTweetObject();
 
-	regenerated_OBJ.profileImageURL = await getRegeneratedProfileImage();
+	const {name, surName, url, userName} = await getRegeneratedProfileImage();
 
-	updateProfileImage(regenerated_OBJ.profileImageURL, activeTweet_regenerate_ROW.regenerated_VIEW);
+	regenerated_OBJ.profileImageURL = url;
+	regenerated_OBJ.name = name + " " + surName;
+
+	regenerated_OBJ.username = userName;
+
+	updateProfileImage(url, activeTweet_regenerate_ROW.regenerated_VIEW);
+	updateName(regenerated_OBJ.name, activeTweet_regenerate_ROW.regenerated_VIEW);
+	updateUserName(userName, activeTweet_regenerate_ROW.regenerated_VIEW);
 
 	return regenerated_OBJ;
 }
 
 async function getRegeneratedProfileImage() {
-	var response = await fetch(server + "randomFace", {
+	var response = await fetch(server + "randomProfile", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -99,19 +106,26 @@ async function getRegeneratedProfileImage() {
 		}),
 	});
 
-	var url = "NONE";
+	var ranProfile_OBJ = null;
 
 	const { ok } = response;
 
 	if (ok) {
-		var { face } = await response.json();
-		url = face.url;
+		ranProfile_OBJ = await response.json();
+
 	} else {
 		console.log("%c ➜ ", "background:#ff1cbc;", "error getting regenerated profile image", response);
 	}
 
-	return url;
+	return ranProfile_OBJ;
 }
+
+var updateName = (name, tweet_VIEW) => {
+	tweet_VIEW.querySelector(".name").textContent = name;
+};
+var updateUserName = (name, tweet_VIEW) => {
+	tweet_VIEW.querySelector(".userName").textContent = "@"+name;
+};
 
 var updateProfileImage = (url, tweet_VIEW) => {
 	tweet_VIEW.querySelector("img").src = url;
@@ -122,8 +136,8 @@ function getRegeneratedTweetView(tweetRegenerate_ROW) {
 	div.className = "tweet backColourRegenerated";
 	div.innerHTML = `<div class="profileContainer"><img class="profileImage"/></div>
 	<div class="tweetContent">
-		<div><span class="name">hi name here</span><span class="userName">@hiUserNameHere</span></div>
-		<div>hello content here!</div>
+		<div><span class="name"></span><span class="userName"></span></div>
+		<div class="message">hello content here!</div>
 	</div>`;
 	tweetRegenerate_ROW.row_VIEW.appendChild(div);
 	return div;
