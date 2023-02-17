@@ -1,0 +1,71 @@
+@import url("https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@100;300;400;500;700;800;900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Alegreya Sans", sans-serif;
+}
+
+body {
+  background: #1a1a1e;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a1e;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.tweetRow {
+  width: 100vw;
+  display: flex;
+}
+
+.tweet {
+  font-size: 15px;
+  color: #1a1a1e;
+  width:450px;
+  border-radius: 8px;
+  padding:10px;
+  margin: 10px;
+  display: flex;
+}
+
+.backColourDefault {
+  background: #08abb0;
+}
+
+.name {
+  font-weight: 700;
+}
+.userName {
+  padding-left:10px;
+  color: #2d2d37;
+}
+
+.profileContainer {
+  margin-right: 10px;
+}
+
+.profileImage {
+  width:60px;
+  border-radius: 60px;
+}
+.regenerateButton {
+  font-size: 25px;
+  background: #0f898d;
+  width:38px;
+  height:38px;
+  border-radius: 38px;
+  text-align: center;
+  padding-top: 2px;
+  user-select: none;
+  cursor: pointer;
+}
+.tweetContent {
+  flex: 50%;
+}
