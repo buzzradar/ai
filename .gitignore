@@ -1,11 +1,10 @@
 node_modules
-randomFace
-apiKeys
 .env
 .vscode/*
 !.vscode/extensions.json
+
 .idea
-**/.DS_Store
+.DS_Store
 .node_modules
 *.suo
 *.ntvs*
