@@ -1,19 +1,15 @@
 import express from "express";
 const router = express.Router();
 import { LanguageServiceClient } from "@google-cloud/language";
-import { jsonFileFromGoogle } from '../lunar-arc-378014-d3455e8e0581.json';
+import lunarArcJSON from '../apiKeys/lunar-arc-378014-d3455e8e0581.json' assert { type: "json" };
+
+console.log ("%c ➜ ", "background:#00FFbc;", "lunarArcJSON", lunarArcJSON);
 
 
 // Creates a client
 const client = new LanguageServiceClient({
-    credentials: jsonFileFromGoogle,
+    credentials: lunarArcJSON,
 });
-
-//console.log("JSON KEY FROM GOOGLE SERVICES :", process.env.GOOGLE_APPLICATION_CREDENTIALS);
-//console.log("JSON Content :", jsonFileFromGoogle);
-//console.log("Client------- :", client.auth);
-
-
 
 // Define a POST route that analyzes the sentiment of a text
 router.post('/', async (req, res) => {
