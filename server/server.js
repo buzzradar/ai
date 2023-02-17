@@ -33,7 +33,7 @@ if (process.env.NODE_ENV === 'production') {
 function displayServer(){
 	var server = "http://localhost:7347/";
 	if (process.env.NODE_ENV === 'production') {
-		server = "https://cnl.onrender.com";
+		server = "https://cnl.onrender.com/";
 	}
 	console.log("AI server started on " + server);
 }
