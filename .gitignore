@@ -7,7 +7,7 @@ randomFace
 .idea
 .DS_Store
 .node_modules
-.package-lock.json
+package-lock.json
 *.suo
 *.ntvs*
 *.njsproj
@@ -21,6 +21,6 @@ server/lunar-arc-378014-d3455e8e0581.json
 client/cnl/dist
 
 **/.DS_Store
-**/.package-lock.json
+**/package-lock.json
 randomFace
 apiKeys
