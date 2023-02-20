@@ -24,12 +24,6 @@ app.use ("/codex", codexRouter);
 app.use ("/cnl", cnlRouter);
 // app.use ("/fakeprofile", fakeprofileRouter);
 
-if (process.env.NODE_ENV === 'production') {
-	const server = "http://localhost:7347/";
-} else {
-	const server = "https://cnl.onrender.com";
-}
-
 function displayServer(){
 	var server = "http://localhost:7347/";
 	if (process.env.NODE_ENV === 'production') {

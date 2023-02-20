@@ -1,3 +1,4 @@
+import { resolve } from 'path'
 import { defineConfig } from "vite";
 import path from 'path';
 
@@ -9,12 +10,12 @@ export default defineConfig({
 		}
 	},
 	server: {
-		open: "./src/index.html"
+		open: "./index.html"
 	},
 	build: {
 		rollupOptions: {
 		  input: {
-			main: './src/index.html'
+			main: resolve(__dirname, '/index.html'),  
 		  }
 		}
 	},
