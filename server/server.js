@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 import cors from "cors";
 import openaiRouter from "./routes/openai.js";
 import cnlRouter from "./routes/cnl.js";
-// import fakeprofileRouter from "./routes/fakeprofile";
+import randomProfile from "./routes/randomProfile.js";
 
 dotenv.config();
 
@@ -20,8 +20,8 @@ app.get("/", async (req, res) => {
 });
 
 
-app.use ("/codex", codexRouter);
 app.use ("/cnl", cnlRouter);
 app.use ("/randomProfile", randomProfile);
+app.use ("/openai", openaiRouter);
 
 app.listen(7347, () => console.log("AI server started on http://localhost:7347"));
