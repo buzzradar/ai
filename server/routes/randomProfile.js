@@ -1,8 +1,15 @@
 import express from "express";
 import lodash from "lodash";
-import namesFemale from "../assets/names-female.json" assert { type: "json" };
-import namesMale from "../assets/names-male.json" assert { type: "json" };
-import namesSurnames from "../assets/names-surnames.json" assert { type: "json" };
+// import namesFemale from "../assets/names-female.json";
+// import namesMale from "../assets/names-male.json";
+// import namesSurnames from "../assets/names-surnames.json";
+
+import { createRequire } from 'node:module';
+var require = createRequire(import.meta.url);
+
+var namesFemale = require("../assets/names-female.json");
+var namesMale = require("../assets/names-male.json");
+var namesSurnames = require("../assets/names-surnames.json");
 
 const router = express.Router();
 
