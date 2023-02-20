@@ -6,12 +6,17 @@ const form = document.querySelector("form");
 const chatContainer = document.querySelector("#chat_container");
 const version = "0.1.1";
 
-// const server = "http://localhost:7347/";
-const server = "https://ai-gmed.onrender.com/";
+var server = "http";
+
+if (process.env.NODE_ENV == "development") {
+	server += "://localhost:7347/";
+} else {
+	server += "s://ai-gmed.onrender.com/";
+}
 
 console.log("%c ➜ ", "background:#93f035;", "ibot version:", version, "server:", server);
 
-let loadInterval;
+var loadInterval;
 
 function loader(element) {
 	element.textContent = "";
@@ -93,7 +98,7 @@ const handleSubmit = async (e) => {
 };
 
 async function fetchOpenAI(userPrompt) {
-	var response = await fetch(server + "codex", {
+	var response = await fetch(server + "openai", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
