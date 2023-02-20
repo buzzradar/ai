@@ -4,7 +4,7 @@ import lodash from "lodash";
 // import namesMale from "../assets/names-male.json";
 // import namesSurnames from "../assets/names-surnames.json";
 
-import { createRequire } from 'node:module';
+import { createRequire } from "node:module";
 var require = createRequire(import.meta.url);
 
 var namesFemale = require("../assets/names-female.json");
