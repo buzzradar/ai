@@ -56,7 +56,7 @@ var getRandomProfile = (type) => {
 
 	var userName;
 
-	switch (lodash.random(0, 6)) {
+	switch (lodash.random(0, 8)) {
 		case 0:
 			userName = name.toLowerCase();
 			break;
@@ -77,6 +77,12 @@ var getRandomProfile = (type) => {
 			break;
 		case 6:
 			userName = name.toLowerCase() + "_" + surName;
+			break;
+		case 7:
+			userName = name.charAt(0) + "-" + surName;
+			break;
+		case 8:
+			userName = name.toLowerCase() + "-" + surName;
 			break;
 	}
 
