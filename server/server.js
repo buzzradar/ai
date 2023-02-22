@@ -11,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const version = "0.0.2";
+const version = "0.0.3";
 
 app.get("/", async (req, res) => {
 	res.status(200).send({
