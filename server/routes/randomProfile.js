@@ -98,7 +98,7 @@ var getRandomProfile = (type) => {
 };
 
 var getRandomFaceRackspace = (type) => {
-	const baseURL = "http://0c8eed0b95e8001351c1-cc7a500d9b10d65e67a8ddf30b9c21f5.r33.cf3.rackcdn.com/faces/";
+	const baseURL = "https://staging.buzzradar.com/ai/randomFace/";
 
 	var totalImages; // total images on rackspace
 	if (type == "male") {
