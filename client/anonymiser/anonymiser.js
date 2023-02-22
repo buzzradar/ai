@@ -1,4 +1,4 @@
-import { uniqueId } from "lodash";
+import { debounce } from "lodash";
 import { chart } from "./assets/tweets.json";
 const version = "0.0.1";
 
@@ -10,8 +10,7 @@ if (process.env.NODE_ENV == "development") {
 	server += "s://ai-gmed.onrender.com/";
 }
 
-
-console.log("%c ➜ ", "background:#93f035;", "tweetRegenerator version:", version, "server:", server);
+console.log("%c ➜ ", "background:#93f035;", "tweetRegenerator version:", version, "server API:", server);
 
 var tweets_LIST = [];
 
@@ -62,10 +61,12 @@ var addTweetView = (id, tweet_OBJ) => {
 									<div><span class="name">${name}</span><span class="userName">@${username}</span></div>
 									<div>${content}</div>
 								</div>
-								<div class="regenerateButton">🪄</div>
+								<div class="regenerateButton">🔄</div>
 							</div>
 						</div>`;
 };
+
+var debounceSaveRegenerated = debounce(saveRegeneratedTweet, 800);
 
 var onTweetSelected = (id) => {
 	if (!isRenegerating) {
@@ -74,49 +75,48 @@ var onTweetSelected = (id) => {
 	}
 };
 
-var regenerateTweet = (tweetRegenerate_ROW) => {
+async function regenerateTweet(tweetRegenerate_ROW) {
 	activeTweet_regenerate_ROW = tweetRegenerate_ROW;
 
 	// first create skeleton view
 	if (!tweetRegenerate_ROW.regenerated_VIEW) tweetRegenerate_ROW.regenerated_VIEW = getRegeneratedTweetView(tweetRegenerate_ROW);
 
 	// then get regenerated tweet and populate view as we get content
-	tweetRegenerate_ROW.regenerated_OBJ = getRegenerated_OBJ();
-};
+	tweetRegenerate_ROW.regenerated_OBJ = await getRegenerated_OBJ();
+
+	console.log("%c -----➜ ", "background:#00FFbc;", "regenerated:", tweetRegenerate_ROW);
+}
 
 async function getRegenerated_OBJ() {
-
-	updateContent ("Loading...", activeTweet_regenerate_ROW.regenerated_VIEW);
+	updateContent("Loading...", activeTweet_regenerate_ROW.regenerated_VIEW);
 
 	var regenerated_OBJ = initTweetObject();
 
-	const {name, surName, url, userName} = await getRegeneratedProfileImage();
+	const { name, surName, url, userName } = await getRegeneratedProfileImage();
 
 	regenerated_OBJ.profileImageURL = url;
 	regenerated_OBJ.name = name + " " + surName;
 
 	regenerated_OBJ.username = userName;
+	var { regenerated_VIEW } = activeTweet_regenerate_ROW;
 
-	updateProfileImage(url, activeTweet_regenerate_ROW.regenerated_VIEW);
-	updateName(regenerated_OBJ.name, activeTweet_regenerate_ROW.regenerated_VIEW);
-	updateUserName(userName, activeTweet_regenerate_ROW.regenerated_VIEW);
+	updateProfileImage(url, regenerated_VIEW);
+	updateName(regenerated_OBJ.name, regenerated_VIEW);
+	updateUserName(userName, regenerated_VIEW);
 
-	const {success, content} = await getRegeneratedTweetMessage();
+	var message = await getRegeneratedTweetMessage();
 
-	regenerated_OBJ.content = content;
-
-	updateContent(content, activeTweet_regenerate_ROW.regenerated_VIEW);
+	regenerated_OBJ.content = message.content;
+	updateContent(message.content, regenerated_VIEW);
 
 	isRenegerating = false;
 
-	console.log ("%c ➜ ", "background:#00FFbc;", "regenerated_OBJ:", regenerated_OBJ);
+	console.log("%c -----➜ ", "background:#ff00ff;", "regenerated_OBJ:", regenerated_OBJ);
 
 	return regenerated_OBJ;
 }
 
-
 async function getRegeneratedTweetMessage() {
-
 	var response = await fetch(server + "openai", {
 		method: "POST",
 		headers: {
@@ -125,10 +125,9 @@ async function getRegeneratedTweetMessage() {
 		body: JSON.stringify({
 			model: "text-davinci-003",
 			max_tokens: 1000,
-			prompt: `rephrase\n\n${activeTweet_regenerate_ROW.original_OBJ.content}`
+			prompt: `rephrase\n\n${activeTweet_regenerate_ROW.original_OBJ.content}`,
 		}),
 	});
-
 
 	const { ok } = response;
 
@@ -149,7 +148,6 @@ async function getRegeneratedTweetMessage() {
 		success: success,
 		content: content,
 	};
-
 }
 
 async function getRegeneratedProfileImage() {
@@ -169,7 +167,6 @@ async function getRegeneratedProfileImage() {
 
 	if (ok) {
 		ranProfile_OBJ = await response.json();
-
 	} else {
 		console.log("%c ➜ ", "background:#ff1cbc;", "error getting regenerated profile image", response);
 	}
@@ -181,7 +178,7 @@ var updateName = (name, tweet_VIEW) => {
 	tweet_VIEW.querySelector(".name").textContent = name;
 };
 var updateUserName = (name, tweet_VIEW) => {
-	tweet_VIEW.querySelector(".userName").textContent = "@"+name;
+	tweet_VIEW.querySelector(".userName").textContent = "@" + name;
 };
 
 var updateContent = (message, tweet_VIEW) => {
@@ -195,13 +192,32 @@ var updateProfileImage = (url, tweet_VIEW) => {
 function getRegeneratedTweetView(tweetRegenerate_ROW) {
 	var div = document.createElement("div");
 	div.className = "tweet backColourRegenerated";
+
 	div.innerHTML = `<div class="profileContainer"><img class="profileImage"/></div>
 	<div class="tweetContent">
-		<div><span class="name"></span><span class="userName"></span></div>
-		<div class="message"></div>
+		<div><span class="name" contenteditable="true"></span><span class="userName" contenteditable="true"></span></div>
+		<div class="message" contenteditable="true"></div>
 	</div>`;
+
+	div.querySelector(".name").addEventListener("input", (e) => {
+		tweetRegenerate_ROW.regenerated_OBJ.name = e.target.textContent;
+		debounceSaveRegenerated(tweetRegenerate_ROW.id);
+	});
+	div.querySelector(".userName").addEventListener("input", (e) => {
+		tweetRegenerate_ROW.regenerated_OBJ.username = e.target.textContent;
+		debounceSaveRegenerated(tweetRegenerate_ROW.id);
+	});
+	div.querySelector(".message").addEventListener("input", (e) => {
+		tweetRegenerate_ROW.regenerated_OBJ.content = e.target.textContent;
+		debounceSaveRegenerated(tweetRegenerate_ROW.id);
+	});
+
 	tweetRegenerate_ROW.row_VIEW.appendChild(div);
 	return div;
+}
+
+function saveRegeneratedTweet(id) {
+	console.log("%c ----➜ ", "background:#00FFbc;", "saveTweet:", id, getTweetById(id));
 }
 
 var getTweetById = (id) => {
