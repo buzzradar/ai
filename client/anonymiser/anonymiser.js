@@ -48,6 +48,7 @@ var initTweetObject = () => {
 		profileImageURL: null,
 		content: null,
 		postImageURL: null,
+		genFaces: null,
 	};
 };
 
@@ -92,15 +93,23 @@ async function getRegenerated_OBJ() {
 
 	var regenerated_OBJ = initTweetObject();
 
-	const { name, surName, url, userName } = await getRegeneratedProfileImage();
+	const { name, surName, userName, genFaces } = await getRegeneratedProfileImage();
+	var faces = [];
+	// if (genFaces.error) {
+	// 	console.log("%c ➜ ", "background:#ff1cbc;", "error genFaces:", genFaces.error);
+	// } else {
+	// 	faces = genFaces.data.faces;
+	// }
 
-	regenerated_OBJ.profileImageURL = url;
+	// console.log("%c ➜ ", "background:#ff1cbc;", "genFaces.data:", genFaces);
+
 	regenerated_OBJ.name = name + " " + surName;
+	regenerated_OBJ.genFaces = { index: 0, faces: faces };
 
 	regenerated_OBJ.username = userName;
 	var { regenerated_VIEW } = activeTweet_regenerate_ROW;
 
-	updateProfileImage(url, regenerated_VIEW);
+	updateProfileImage(regenerated_OBJ.genFaces, regenerated_VIEW);
 	updateName(regenerated_OBJ.name, regenerated_VIEW);
 	updateUserName(userName, regenerated_VIEW);
 
@@ -111,21 +120,23 @@ async function getRegenerated_OBJ() {
 
 	isRenegerating = false;
 
-	console.log("%c -----➜ ", "background:#ff00ff;", "regenerated_OBJ:", regenerated_OBJ);
-
 	return regenerated_OBJ;
 }
 
 async function getRegeneratedTweetMessage() {
+
 	var response = await fetch(server + "openai", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
+			hashtagToEndOfString: true, // if true we move hashtag to end of sentence as we've seen empty strings returned
+			replaceHandles : "handle", // if specified we replace handles with this string
 			model: "text-davinci-003",
-			max_tokens: 1000,
-			prompt: `rephrase\n\n${activeTweet_regenerate_ROW.original_OBJ.content}`,
+			max_tokens: 500,
+			prompt: "rephrase",
+			content: activeTweet_regenerate_ROW.original_OBJ.content,
 		}),
 	});
 
@@ -137,8 +148,8 @@ async function getRegeneratedTweetMessage() {
 	if (ok) {
 		success = true;
 		let data = await response.json();
-		console.log("%c ➜ ", "background:#00FFbc;", "openAI server success data:", data);
 		content = data.bot.trim(); // trims any trailing spaces/'\n'
+		console.log("%c ➜ ", "background:#00FFbc;", "openAI server success data:", data);
 	} else {
 		console.log("%c ➜ ", "background:#ff1cbc;", "openAI server fail:", response);
 		content = "Sorry, something went wrong, please try again later - " + response.statusText + " " + response.status;
@@ -157,7 +168,7 @@ async function getRegeneratedProfileImage() {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			type: null, // "female" or "male" if not specified returns random female or male
+			type: "female", // "female" or "male" if not specified returns random female or male
 		}),
 	});
 
@@ -185,8 +196,20 @@ var updateContent = (message, tweet_VIEW) => {
 	tweet_VIEW.querySelector(".message").textContent = message;
 };
 
-var updateProfileImage = (url, tweet_VIEW) => {
-	tweet_VIEW.querySelector("img").src = url;
+var updateProfileImage = (genFaces, tweet_VIEW) => {
+	// const resolution = "128"; // pixels
+	// var urlDisplay,
+	// 	urls_LIST = genFaces.faces[genFaces.index].urls;
+	// urls_LIST.forEach((url) => {
+	// 	for (let res in url) {
+	// 		if (url.hasOwnProperty(res)) {
+	// 			if (res == resolution) {
+	// 				urlDisplay = url[res];
+	// 			}
+	// 		}
+	// 	}
+	// });
+	// tweet_VIEW.querySelector("img").src = urlDisplay;
 };
 
 function getRegeneratedTweetView(tweetRegenerate_ROW) {
