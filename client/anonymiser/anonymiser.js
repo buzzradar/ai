@@ -10,9 +10,10 @@ if (process.env.NODE_ENV == "development") {
 	server += "s://ai-gmed.onrender.com/";
 }
 
-console.log("%c ➜ ", "background:#93f035;", "tweetRegenerator version:", version, "server API:", server);
+console.log("%c anonymiser version: " + version + " ", "background:#93f035;", "server API:", server);
 
 var tweets_LIST = [];
+var anonymisedProfiles_LIST = [];
 
 var app_DIV = document.getElementById("app");
 var activeTweet_regenerate_ROW = null; // active tweet regenerator instance
@@ -23,32 +24,19 @@ var initTweetRewordRow = (tweet_JSON) => {
 	const { tweet_id } = tweet_JSON;
 	addTweetView(tweet_id, tweet_OBJ);
 
-	tweets_LIST.push({ id: tweet_id, original_OBJ: tweet_OBJ, regenerated_OBJ: null, row_VIEW: null, regenerated_VIEW: null });
+	tweets_LIST.push({ tweet_id: tweet_id, original_OBJ: tweet_OBJ, anonymised_OBJ: { profile: null, message: null }, row_VIEW: null, regenerated_VIEW: null });
 };
 
 var getNewTweetObject = (tweet_JSON) => {
 	var { user, content, image_url } = tweet_JSON;
 	var { name, username, profile_image_big } = user;
 
-	var tweet_OBJ = initTweetObject();
-
-	tweet_OBJ.name = name;
-	tweet_OBJ.username = username;
-	tweet_OBJ.profileImageURL = profile_image_big;
-	tweet_OBJ.content = content;
-	tweet_OBJ.postImageURL = image_url;
-
-	return tweet_OBJ;
-};
-
-var initTweetObject = () => {
 	return {
-		name: null,
-		username: null,
-		profileImageURL: null,
-		content: null,
-		postImageURL: null,
-		genFaces: null,
+		name: name,
+		username: username,
+		profileImageURL: profile_image_big,
+		content: content,
+		postImageURL: image_url,
 	};
 };
 
@@ -82,49 +70,48 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	// first create skeleton view
 	if (!tweetRegenerate_ROW.regenerated_VIEW) tweetRegenerate_ROW.regenerated_VIEW = getRegeneratedTweetView(tweetRegenerate_ROW);
 
-	// then get regenerated tweet and populate view as we get content
-	tweetRegenerate_ROW.regenerated_OBJ = await getRegenerated_OBJ();
+	// TODO: figure out if we already have anonymised profile from previous session in db
 
-	console.log("%c -----➜ ", "background:#00FFbc;", "regenerated:", tweetRegenerate_ROW);
-}
+	// check if we already have anonymised profile
 
-async function getRegenerated_OBJ() {
-	updateContent("Loading...", activeTweet_regenerate_ROW.regenerated_VIEW);
+	var anonymisedProfile_OBJ = getAnonymisedByOriginalUserName(tweetRegenerate_ROW.original_OBJ.username);
 
-	var regenerated_OBJ = initTweetObject();
+	if (anonymisedProfile_OBJ) {
+		console.log("%c ➜ ", "background:#93f035;", "yeah we already have anonymised profile:", anonymisedProfile_OBJ);
+	} else {
+		let aProfile_OBJ = await getRegeneratedProfileImage();
+		anonymisedProfile_OBJ = { originalUserName: tweetRegenerate_ROW.original_OBJ.username, profile_OBJ: aProfile_OBJ, imageIndex: 0 };
+		anonymisedProfiles_LIST.push(anonymisedProfile_OBJ);
+	}
 
-	const { name, surName, userName, genFaces } = await getRegeneratedProfileImage();
-	var faces = [];
-	// if (genFaces.error) {
-	// 	console.log("%c ➜ ", "background:#ff1cbc;", "error genFaces:", genFaces.error);
-	// } else {
-	// 	faces = genFaces.data.faces;
-	// }
+	displayAnonymisedProfile(tweetRegenerate_ROW.regenerated_VIEW, anonymisedProfile_OBJ);
 
-	// console.log("%c ➜ ", "background:#ff1cbc;", "genFaces.data:", genFaces);
-
-	regenerated_OBJ.name = name + " " + surName;
-	regenerated_OBJ.genFaces = { index: 0, faces: faces };
-
-	regenerated_OBJ.username = userName;
-	var { regenerated_VIEW } = activeTweet_regenerate_ROW;
-
-	updateProfileImage(regenerated_OBJ.genFaces, regenerated_VIEW);
-	updateName(regenerated_OBJ.name, regenerated_VIEW);
-	updateUserName(userName, regenerated_VIEW);
-
-	var message = await getRegeneratedTweetMessage();
-
-	regenerated_OBJ.content = message.content;
-	updateContent(message.content, regenerated_VIEW);
+	tweetRegenerate_ROW.anonymised_OBJ.message = await getRephrasedMessage();
 
 	isRenegerating = false;
-
-	return regenerated_OBJ;
 }
 
-async function getRegeneratedTweetMessage() {
+function displayAnonymisedProfile(regenerated_VIEW, anonymisedProfile_OBJ) {
+	const { imageIndex, profile_OBJ } = anonymisedProfile_OBJ;
+	const { name, surName, userName, genFaces } = profile_OBJ;
+	updateName(name + " " + surName, regenerated_VIEW);
+	updateUserName(userName, regenerated_VIEW);
 
+	updateProfileImage(genFaces.data.faces[imageIndex].urls, regenerated_VIEW);
+}
+
+async function getRephrasedMessage() {
+	var { regenerated_VIEW } = activeTweet_regenerate_ROW;
+	updateContent("Loading...", regenerated_VIEW);
+
+	const { content } = await getOpenAiRephrasedMessage();
+
+	updateContent(content, regenerated_VIEW);
+
+	return content;
+}
+
+async function getOpenAiRephrasedMessage() {
 	var response = await fetch(server + "openai", {
 		method: "POST",
 		headers: {
@@ -132,7 +119,7 @@ async function getRegeneratedTweetMessage() {
 		},
 		body: JSON.stringify({
 			hashtagToEndOfString: true, // if true we move hashtag to end of sentence as we've seen empty strings returned
-			replaceHandles : "handle", // if specified we replace handles with this string
+			replaceHandles: "handle", // if specified we replace handles with this string
 			model: "text-davinci-003",
 			max_tokens: 500,
 			prompt: "rephrase",
@@ -168,7 +155,7 @@ async function getRegeneratedProfileImage() {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
-			type: "female", // "female" or "male" if not specified returns random female or male
+			type: null, // "female" or "male" if not specified returns random female or male
 		}),
 	});
 
@@ -196,27 +183,29 @@ var updateContent = (message, tweet_VIEW) => {
 	tweet_VIEW.querySelector(".message").textContent = message;
 };
 
-var updateProfileImage = (genFaces, tweet_VIEW) => {
-	// const resolution = "128"; // pixels
-	// var urlDisplay,
-	// 	urls_LIST = genFaces.faces[genFaces.index].urls;
-	// urls_LIST.forEach((url) => {
-	// 	for (let res in url) {
-	// 		if (url.hasOwnProperty(res)) {
-	// 			if (res == resolution) {
-	// 				urlDisplay = url[res];
-	// 			}
-	// 		}
-	// 	}
-	// });
-	// tweet_VIEW.querySelector("img").src = urlDisplay;
+var updateProfileImage = (urls_LIST, tweet_VIEW) => {
+
+	const resolution = "128"; // pixels
+
+	var urlDisplay;
+
+	urls_LIST.forEach((url) => {
+		for (let res in url) {
+			if (url.hasOwnProperty(res)) {
+				if (res == resolution) {
+					urlDisplay = url[res];
+				}
+			}
+		}
+	});
+	tweet_VIEW.querySelector("img").src = urlDisplay;
 };
 
 function getRegeneratedTweetView(tweetRegenerate_ROW) {
 	var div = document.createElement("div");
 	div.className = "tweet backColourRegenerated";
 
-	div.innerHTML = `<div class="profileContainer"><img class="profileImage"/></div>
+	div.innerHTML = `<div class="profileContainer"><img class="profileImage profileImageChoice"/></div>
 	<div class="tweetContent">
 		<div><span class="name" contenteditable="true"></span><span class="userName" contenteditable="true"></span></div>
 		<div class="message" contenteditable="true"></div>
@@ -224,27 +213,40 @@ function getRegeneratedTweetView(tweetRegenerate_ROW) {
 
 	div.querySelector(".name").addEventListener("input", (e) => {
 		tweetRegenerate_ROW.regenerated_OBJ.name = e.target.textContent;
-		debounceSaveRegenerated(tweetRegenerate_ROW.id);
+		debounceSaveRegenerated(tweetRegenerate_ROW.tweet_id);
 	});
 	div.querySelector(".userName").addEventListener("input", (e) => {
 		tweetRegenerate_ROW.regenerated_OBJ.username = e.target.textContent;
-		debounceSaveRegenerated(tweetRegenerate_ROW.id);
+		debounceSaveRegenerated(tweetRegenerate_ROW.tweet_id);
 	});
 	div.querySelector(".message").addEventListener("input", (e) => {
 		tweetRegenerate_ROW.regenerated_OBJ.content = e.target.textContent;
-		debounceSaveRegenerated(tweetRegenerate_ROW.id);
+		debounceSaveRegenerated(tweetRegenerate_ROW.tweet_id);
+	});
+
+	div.querySelector(".profileImage").addEventListener("click", () => {
+		displayOtherProfileImages(tweetRegenerate_ROW.tweet_id);
 	});
 
 	tweetRegenerate_ROW.row_VIEW.appendChild(div);
 	return div;
 }
 
-function saveRegeneratedTweet(id) {
-	console.log("%c ----➜ ", "background:#00FFbc;", "saveTweet:", id, getTweetById(id));
+function displayOtherProfileImages(tweet_id) {
+	var { anonymised_OBJ, regenerated_VIEW } = getTweetById(tweet_id);
+	// updateProfileImage(anonymised_OBJ.profile.faces, regenerated_VIEW);
 }
 
-var getTweetById = (id) => {
-	return tweets_LIST.find((x) => x.id == id);
+function saveRegeneratedTweet(tweet_id) {
+	console.log("%c ----➜ ", "background:#00FFbc;", "saveTweet:", tweet_id, getTweetById(tweet_id));
+}
+
+var getTweetById = (tweet_id) => {
+	return tweets_LIST.find((x) => x.tweet_id == tweet_id);
+};
+
+var getAnonymisedByOriginalUserName = (originalUserName) => {
+	return anonymisedProfiles_LIST.find((x) => x.originalUserName == originalUserName);
 };
 
 chart.chart_data.forEach((tweet_JSON) => {
@@ -252,11 +254,11 @@ chart.chart_data.forEach((tweet_JSON) => {
 });
 
 tweets_LIST.forEach((tweetRow_OBJ) => {
-	const { id } = tweetRow_OBJ;
+	const { tweet_id } = tweetRow_OBJ;
 
-	tweetRow_OBJ.row_VIEW = document.getElementById(id);
+	tweetRow_OBJ.row_VIEW = document.getElementById(tweet_id);
 
 	tweetRow_OBJ.row_VIEW.getElementsByClassName("regenerateButton")[0].addEventListener("click", () => {
-		onTweetSelected(id);
+		onTweetSelected(tweet_id);
 	});
 });

@@ -14,17 +14,28 @@ var namesSurnames = require("../assets/names-surnames.json");
 const router = express.Router();
 const genPhotosURL = "https://api.generated.photos/api/v1/faces?api_key=";
 
+
 router.post("/", async (req, res) => {
 	const { type } = req.body; // female or male if not specified, random
 
 	console.log("we want type:", type);
 
+	let ranProfile_OBJ = getRandomProfile(type);
+
+	// * options for generated.photos: https://generated.photos/account#apikey
+	const page = "1";
+	const per_page = "5";
+	const age = lodash.sample(["adult", "young-adult"]);
+	const order = "random";
+
+
 	try {
-		let ranProfile_OBJ = getRandomProfile(type);
 
-		let url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=1&per_page=1&gender=${ranProfile_OBJ.type}&age=adult`;
+		let url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
 
-		// ranProfile_OBJ.genFaces = await getGenPhoto(url);
+		console.log ("url:", url);
+
+		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 
 		res.status(200).send(ranProfile_OBJ);
 	} catch (error) {

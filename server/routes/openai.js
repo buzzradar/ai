@@ -23,10 +23,10 @@ router.post("/", async (req, res) => {
 		console.log("max_tokens:", max_tokens);
 		console.log("prompt:", prompt);
 		console.log("content:", content);
-		
+
 		if (hashtagToEndOfString) content = moveHashtagToEndOfString(content);
 		if (replaceHandles) content = replaceTheHandles(replaceHandles, content);
-		
+
 		console.log("content:", content);
 
 		var response = await openai.createCompletion({
@@ -80,8 +80,8 @@ var moveHashtagToEndOfString = (content) => {
 /**
  * replaecTheHandles
  * * replace the handles with the new handle
- * @param {string} replaceHandles 
- * @param {string} content 
+ * @param {string} replaceHandles
+ * @param {string} content
  * @returns {string}
  */
 

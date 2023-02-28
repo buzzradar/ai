@@ -56,8 +56,15 @@ body {
 
 .profileImage {
   width:60px;
+  height:60px;
   border-radius: 60px;
 }
+
+.profileImageChoice {
+  border-style: dashed;
+  cursor: pointer;
+}
+
 .regenerateButton {
   font-size: 25px;
   /* background: #141417; */
