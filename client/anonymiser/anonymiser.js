@@ -24,7 +24,7 @@ var initTweetRewordRow = (tweet_JSON) => {
 	const { tweet_id } = tweet_JSON;
 	addTweetView(tweet_id, tweet_OBJ);
 
-	tweets_LIST.push({ tweet_id: tweet_id, original_OBJ: tweet_OBJ, anonymised_OBJ: { profile: null, message: null }, row_VIEW: null, regenerated_VIEW: null });
+	tweets_LIST.push({ tweet_id: tweet_id, original_OBJ: tweet_OBJ, anonymised_OBJ: { message: null }, row_VIEW: null, regenerated_VIEW: null });
 };
 
 var getNewTweetObject = (tweet_JSON) => {
@@ -55,7 +55,8 @@ var addTweetView = (id, tweet_OBJ) => {
 						</div>`;
 };
 
-var debounceSaveRegenerated = debounce(saveRegeneratedTweet, 800);
+var debounceSaveRegeneratedTweet = debounce(saveRegeneratedTweet, 1500);
+var debounceSaveAnonProfile = debounce(saveAnonProfile, 1500);
 
 var onTweetSelected = (id) => {
 	if (!isRenegerating) {
@@ -71,17 +72,18 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	if (!tweetRegenerate_ROW.regenerated_VIEW) tweetRegenerate_ROW.regenerated_VIEW = getRegeneratedTweetView(tweetRegenerate_ROW);
 
 	// TODO: figure out if we already have anonymised profile from previous session in db
-
-	// check if we already have anonymised profile
-
-	var anonymisedProfile_OBJ = getAnonymisedByOriginalUserName(tweetRegenerate_ROW.original_OBJ.username);
+	const { username: originalUserName } = tweetRegenerate_ROW.original_OBJ;
+	var anonymisedProfile_OBJ = getAnonymisedByOriginalUserName(originalUserName);
 
 	if (anonymisedProfile_OBJ) {
 		console.log("%c ➜ ", "background:#93f035;", "yeah we already have anonymised profile:", anonymisedProfile_OBJ);
 	} else {
 		let aProfile_OBJ = await getRegeneratedProfileImage();
-		anonymisedProfile_OBJ = { originalUserName: tweetRegenerate_ROW.original_OBJ.username, profile_OBJ: aProfile_OBJ, imageIndex: 0 };
+		aProfile_OBJ.imageIndex = 0;
+		aProfile_OBJ.fullName = aProfile_OBJ.name + " " + aProfile_OBJ.surName;
+		anonymisedProfile_OBJ = { originalUserName: originalUserName, profile_OBJ: aProfile_OBJ };
 		anonymisedProfiles_LIST.push(anonymisedProfile_OBJ);
+		saveAnonProfile(originalUserName);
 	}
 
 	displayAnonymisedProfile(tweetRegenerate_ROW.regenerated_VIEW, anonymisedProfile_OBJ);
@@ -89,12 +91,13 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	tweetRegenerate_ROW.anonymised_OBJ.message = await getRephrasedMessage();
 
 	isRenegerating = false;
+
+	saveRegeneratedTweet(tweetRegenerate_ROW.tweet_id);
 }
 
 function displayAnonymisedProfile(regenerated_VIEW, anonymisedProfile_OBJ) {
-	const { imageIndex, profile_OBJ } = anonymisedProfile_OBJ;
-	const { name, surName, userName, genFaces } = profile_OBJ;
-	updateName(name + " " + surName, regenerated_VIEW);
+	const { fullName, userName, genFaces, imageIndex } = anonymisedProfile_OBJ.profile_OBJ;
+	updateFullName(fullName, regenerated_VIEW);
 	updateUserName(userName, regenerated_VIEW);
 
 	updateProfileImage(genFaces.data.faces[imageIndex].urls, regenerated_VIEW);
@@ -136,7 +139,7 @@ async function getOpenAiRephrasedMessage() {
 		success = true;
 		let data = await response.json();
 		content = data.bot.trim(); // trims any trailing spaces/'\n'
-		console.log("%c ➜ ", "background:#00FFbc;", "openAI server success data:", data);
+		console.log("openAI server success data:", data);
 	} else {
 		console.log("%c ➜ ", "background:#ff1cbc;", "openAI server fail:", response);
 		content = "Sorry, something went wrong, please try again later - " + response.statusText + " " + response.status;
@@ -172,19 +175,18 @@ async function getRegeneratedProfileImage() {
 	return ranProfile_OBJ;
 }
 
-var updateName = (name, tweet_VIEW) => {
-	tweet_VIEW.querySelector(".name").textContent = name;
+var updateFullName = (fullName, tweet_VIEW) => {
+	tweet_VIEW.querySelector(".fullNameEdit").textContent = fullName;
 };
 var updateUserName = (name, tweet_VIEW) => {
-	tweet_VIEW.querySelector(".userName").textContent = "@" + name;
+	tweet_VIEW.querySelector(".userNameEdit").textContent = "@" + name;
 };
 
 var updateContent = (message, tweet_VIEW) => {
-	tweet_VIEW.querySelector(".message").textContent = message;
+	tweet_VIEW.querySelector(".messageEdit").textContent = message;
 };
 
 var updateProfileImage = (urls_LIST, tweet_VIEW) => {
-
 	const resolution = "128"; // pixels
 
 	var urlDisplay;
@@ -207,38 +209,89 @@ function getRegeneratedTweetView(tweetRegenerate_ROW) {
 
 	div.innerHTML = `<div class="profileContainer"><img class="profileImage profileImageChoice"/></div>
 	<div class="tweetContent">
-		<div><span class="name" contenteditable="true"></span><span class="userName" contenteditable="true"></span></div>
-		<div class="message" contenteditable="true"></div>
+		<div><span class="fullNameEdit" contenteditable="true"></span><span class="userNameEdit" contenteditable="true"></span></div>
+		<div class="messageEdit" contenteditable="true"></div>
 	</div>`;
 
-	div.querySelector(".name").addEventListener("input", (e) => {
-		tweetRegenerate_ROW.regenerated_OBJ.name = e.target.textContent;
-		debounceSaveRegenerated(tweetRegenerate_ROW.tweet_id);
+	div.querySelector(".fullNameEdit").addEventListener("input", (e) => {
+		updateProfileNames("fullName", tweetRegenerate_ROW.original_OBJ.username, e.target.textContent);
 	});
-	div.querySelector(".userName").addEventListener("input", (e) => {
-		tweetRegenerate_ROW.regenerated_OBJ.username = e.target.textContent;
-		debounceSaveRegenerated(tweetRegenerate_ROW.tweet_id);
+
+	div.querySelector(".userNameEdit").addEventListener("input", (e) => {
+		updateProfileNames("userName", tweetRegenerate_ROW.original_OBJ.username, e.target.textContent);
 	});
-	div.querySelector(".message").addEventListener("input", (e) => {
-		tweetRegenerate_ROW.regenerated_OBJ.content = e.target.textContent;
-		debounceSaveRegenerated(tweetRegenerate_ROW.tweet_id);
+
+	div.querySelector(".messageEdit").addEventListener("input", (e) => {
+		tweetRegenerate_ROW.anonymised_OBJ.message = e.target.textContent;
+		debounceSaveRegeneratedTweet(tweetRegenerate_ROW.tweet_id);
 	});
 
 	div.querySelector(".profileImage").addEventListener("click", () => {
 		displayOtherProfileImages(tweetRegenerate_ROW.tweet_id);
+		// TODO: save profile back to DB
+		debounceSaveAnonProfile(tweetRegenerate_ROW.original_OBJ.username, true);
 	});
 
 	tweetRegenerate_ROW.row_VIEW.appendChild(div);
 	return div;
 }
 
+function updateProfileNames(keyType, originalUserName, newName) {
+	var { profile_OBJ } = getAnonymisedByOriginalUserName(originalUserName);
+
+	profile_OBJ[keyType] = newName;
+
+	tweets_LIST.forEach((tweet_ROW) => {
+		if (tweet_ROW.regenerated_VIEW && originalUserName == tweet_ROW.original_OBJ.username) {
+			tweet_ROW.regenerated_VIEW.querySelector("." + keyType).textContent = newName;
+		}
+	});
+
+	debounceSaveAnonProfile(originalUserName, true);
+}
+
 function displayOtherProfileImages(tweet_id) {
-	var { anonymised_OBJ, regenerated_VIEW } = getTweetById(tweet_id);
-	// updateProfileImage(anonymised_OBJ.profile.faces, regenerated_VIEW);
+	const { username: originalUserName } = getTweetById(tweet_id).original_OBJ;
+
+	var { profile_OBJ } = getAnonymisedByOriginalUserName(originalUserName);
+	var { faces } = profile_OBJ.genFaces.data;
+	profile_OBJ.imageIndex++;
+
+	if (profile_OBJ.imageIndex >= faces.length) profile_OBJ.imageIndex = 0;
+
+	tweets_LIST.forEach((tweet_ROW) => {
+		if (tweet_ROW.regenerated_VIEW && originalUserName == tweet_ROW.original_OBJ.username) {
+			updateProfileImage(faces[profile_OBJ.imageIndex].urls, tweet_ROW.regenerated_VIEW);
+		}
+	});
 }
 
 function saveRegeneratedTweet(tweet_id) {
-	console.log("%c ----➜ ", "background:#00FFbc;", "saveTweet:", tweet_id, getTweetById(tweet_id));
+	var { anonymised_OBJ, original_OBJ } = getTweetById(tweet_id);
+	var { fullName, userName, imageIndex, genFaces } = getAnonymisedByOriginalUserName(original_OBJ.username).profile_OBJ;
+
+	console.group("save anon tweet");
+	console.log("origin userName:", original_OBJ.username);
+	console.log("origin tweet_id:", tweet_id);
+	console.log("anon userName:", userName);
+	console.log("anon fullName:", fullName);
+	console.log("anon message:", anonymised_OBJ.message);
+	console.log("anon profile img:", genFaces.data.faces[imageIndex]);
+	console.groupEnd();
+
+	// TODO: save tweet back to DB, can we save array of tweets ask Marius?
+}
+
+function saveAnonProfile(originalUsername, saveTweets = false) {
+	console.log("%c ➜ ", "background:#00FFbc;", "originalUsername:", originalUsername);
+
+	var { profile_OBJ: anon_PROFILE } = getAnonymisedByOriginalUserName(originalUsername);
+
+	console.log("TODO: save anon_PROFILE:", anon_PROFILE);
+
+	if (saveTweets) {
+		console.log("TODO: save all tweets for anon_PROFILE");
+	}
 }
 
 var getTweetById = (tweet_id) => {
