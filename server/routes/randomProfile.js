@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
 	const age = lodash.sample(["adult", "young-adult"]);
 	const order = "random";
 
-	var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `ZZ&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
+	var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
 
 	try {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
@@ -85,9 +85,6 @@ async function getGenPhoto(url) {
 		})
 		.catch((error) => {
 			return { error: error, data: null };
-		})
-		.finally((e) => {
-			return e;
 		});
 
 	var { error } = response.data;
