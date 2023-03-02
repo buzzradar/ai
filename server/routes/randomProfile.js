@@ -27,14 +27,12 @@ router.post("/", async (req, res) => {
 	const age = lodash.sample(["adult", "young-adult"]);
 	const order = "random";
 
-	let url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
-
-	console.log("gen url:", url);
+	var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
 
 	try {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 
-		console.log ("geFaces:", ranProfile_OBJ.genFaces);
+		console.log("geFaces:", ranProfile_OBJ.genFaces);
 
 		res.status(200).send(ranProfile_OBJ);
 	} catch (error) {
@@ -55,8 +53,8 @@ router.post("/", async (req, res) => {
 
 async function getGenPhoto(url) {
 	// Default options are marked with *
-	
-	console.log ("fetch", url);
+
+	console.log("fetch", url);
 	var response = await fetch(url, {
 		method: "GET", // *GET, POST, PUT, DELETE, etc.
 		// mode: "cors", // no-cors, *cors, same-origin
@@ -77,12 +75,15 @@ async function getGenPhoto(url) {
 			return { error: false, data: jsondata };
 		})
 		.catch((error) => {
-			console.log ("error here?", error);
+			console.log("error here?", error);
 			return { error: error, data: null };
 		})
 		.finally((e) => {
+			console.log("finally?", e);
 			return e;
 		});
+
+	console.log("response?", response);
 
 	return response;
 }
