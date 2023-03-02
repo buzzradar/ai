@@ -24,7 +24,7 @@ router.post("/", async (req, res) => {
 
 	// * options for generated.photos: https://generated.photos/account#apikey
 	const page = "1";
-	const per_page = "5";
+	const per_page = "6";
 	const age = lodash.sample(["adult", "young-adult"]);
 	const order = "random";
 
