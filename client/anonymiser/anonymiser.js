@@ -4,11 +4,11 @@ const version = "0.0.2";
 
 var server = "http";
 
-// if (process.env.NODE_ENV == "development") {
-	// server += "://localhost:7347/";
-// } else {
+if (process.env.NODE_ENV == "development") {
+	server += "://localhost:7347/";
+} else {
 	server += "s://ai-gmed.onrender.com/";
-// }
+}
 
 console.log("%c anonymiser version: " + version + " ", "background:#93f035;", "server API:", server);
 
@@ -93,7 +93,7 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	if (anonymisedProfile_OBJ) {
 		console.log("%c ➜ ", "background:#93f035;", "yeah we already have anonymised profile:", anonymisedProfile_OBJ);
 	} else {
-		let aProfile_OBJ = await getRegeneratedProfileImage();
+		let aProfile_OBJ = await getRegeneratedProfile();
 		aProfile_OBJ.imageIndex = 0;
 		aProfile_OBJ.fullName = aProfile_OBJ.name + " " + aProfile_OBJ.surName;
 		anonymisedProfile_OBJ = { originalUserName: originalUserName, profile_OBJ: aProfile_OBJ };
@@ -112,8 +112,6 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 }
 
 function displayAnonymisedProfile(regenerated_VIEW, anonymisedProfile_OBJ) {
-
-
 	const { fullName, userName, genFaces, imageIndex } = anonymisedProfile_OBJ.profile_OBJ;
 	updateFullName(fullName, regenerated_VIEW);
 	updateUserName(userName, regenerated_VIEW);
@@ -169,7 +167,10 @@ async function getOpenAiRephrasedMessage() {
 	};
 }
 
-async function getRegeneratedProfileImage() {
+async function getRegeneratedProfile() {
+	var response_JSON,
+		error,
+		ranProfile_OBJ = null;
 	var response = await fetch(server + "randomProfile", {
 		method: "POST",
 		headers: {
@@ -180,15 +181,20 @@ async function getRegeneratedProfileImage() {
 		}),
 	});
 
-	var ranProfile_OBJ = null;
-
 	const { ok } = response;
 
 	if (ok) {
-		ranProfile_OBJ = await response.json();
+		response_JSON = await response.json();
+		if (response_JSON.error) {
+			error = response_JSON;
+		} else {
+			ranProfile_OBJ = response_JSON;
+		}
 	} else {
-		console.log("%c ➜ ", "background:#ff1cbc;", "error getting regenerated profile image", response);
+		error = response;
 	}
+
+	if (error) console.log("%c ➜ ", "background:#ff1cbc;", "error getRegeneratedProfile:", error);
 
 	return ranProfile_OBJ;
 }
