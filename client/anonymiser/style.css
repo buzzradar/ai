@@ -104,6 +104,13 @@ body {
   cursor: pointer;
 
 }
+
+.regenerateButtonFaded {
+  opacity: 0.2;
+}
+
+
 .tweetContent {
   flex: 50%;
 }
+

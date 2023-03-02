@@ -48,7 +48,7 @@ var addTweetView = (id, tweet_OBJ) => {
 								<div class="profileContainer"><img class="profileImage" src="${profileImageURL}" loading="lazy"/></div>
 								<div class="tweetContent">
 									<div><span class="name">${name}</span><span class="userName">@${username}</span></div>
-									<div>${content}</div>
+									<div class="loadingFadeInAndOut">${content}</div>
 								</div>
 								<div class="regenerateButton">🔄</div>
 							</div>
@@ -60,10 +60,25 @@ var debounceSaveAnonProfile = debounce(saveAnonProfile, 1500);
 
 var onTweetSelected = (id) => {
 	if (!isRenegerating) {
+		fadeRegenetateButton(true);
+
 		isRenegerating = true; // avoid multiple requests at same time spamming the servers
+
 		regenerateTweet(getTweetById(id));
 	}
 };
+
+function fadeRegenetateButton(boo) {
+	tweets_LIST.forEach((tweet) => {
+		let classList = tweet.row_VIEW.querySelector(".regenerateButton").classList;
+
+		if (boo) {
+			classList.add("regenerateButtonFaded");
+		} else {
+			classList.remove("regenerateButtonFaded");
+		}
+	});
+}
 
 async function regenerateTweet(tweetRegenerate_ROW) {
 	activeTweet_regenerate_ROW = tweetRegenerate_ROW;
@@ -93,6 +108,7 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	isRenegerating = false;
 
 	saveRegeneratedTweet(tweetRegenerate_ROW.tweet_id);
+	fadeRegenetateButton(false);
 }
 
 function displayAnonymisedProfile(regenerated_VIEW, anonymisedProfile_OBJ) {
