@@ -1,14 +1,14 @@
 import { debounce } from "lodash";
 import { chart } from "./assets/tweets.json";
-const version = "0.0.1";
+const version = "0.0.2";
 
 var server = "http";
 
-if (process.env.NODE_ENV == "development") {
+// if (process.env.NODE_ENV == "development") {
 	server += "://localhost:7347/";
-} else {
-	server += "s://ai-gmed.onrender.com/";
-}
+// } else {
+	// server += "s://ai-gmed.onrender.com/";
+// }
 
 console.log("%c anonymiser version: " + version + " ", "background:#93f035;", "server API:", server);
 
@@ -112,6 +112,8 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 }
 
 function displayAnonymisedProfile(regenerated_VIEW, anonymisedProfile_OBJ) {
+
+
 	const { fullName, userName, genFaces, imageIndex } = anonymisedProfile_OBJ.profile_OBJ;
 	updateFullName(fullName, regenerated_VIEW);
 	updateUserName(userName, regenerated_VIEW);

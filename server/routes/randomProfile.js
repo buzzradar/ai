@@ -14,7 +14,6 @@ var namesSurnames = require("../assets/names-surnames.json");
 const router = express.Router();
 const genPhotosURL = "https://api.generated.photos/api/v1/faces?api_key=";
 
-
 router.post("/", async (req, res) => {
 	const { type } = req.body; // female or male if not specified, random
 
@@ -28,13 +27,11 @@ router.post("/", async (req, res) => {
 	const age = lodash.sample(["adult", "young-adult"]);
 	const order = "random";
 
+	let url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
+
+	console.log("gen url:", url);
 
 	try {
-
-		let url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
-
-		console.log ("url:", url);
-
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 
 		res.status(200).send(ranProfile_OBJ);
@@ -50,7 +47,7 @@ router.post("/", async (req, res) => {
 		// 	console.log(error);
 		// }
 
-		res.status(status).send({ error: status, statusText: statusText });
+		res.status(status).send({ status: status, statusText: statusText, error: error });
 	}
 });
 
