@@ -56,7 +56,7 @@ router.post("/", async (req, res) => {
 
 		console.log ("tried and catch error:", error);
 
-		res.status(status).send({ status: status, statusText: statusText, error: error, jeff: "jeff" });
+		res.status(200).send({ status: status, statusText: statusText, error: error, jeff: "jeff" });
 	}
 });
 
@@ -87,13 +87,14 @@ async function getGenPhoto(url) {
 			return { error: error, data: null };
 		});
 
+	console.log("the response:", response);
+	
 	var { error } = response.data;
 	if (error) {
 		response.error = response.data.error;
 		console.log("hi error genPhotos:", error);
 	}
 
-	console.log("hi response:", response);
 
 	return response;
 }
