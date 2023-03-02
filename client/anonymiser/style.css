@@ -56,8 +56,43 @@ body {
 
 .profileImage {
   width:60px;
+  height:60px;
   border-radius: 60px;
 }
+
+.fullNameEdit {
+  padding-left:5px;
+  padding-right:5px;
+  background: #032f3a;
+  color: #08abb0;
+  border-radius: 4px;
+}
+.userNameEdit {
+  margin-left: 10px;
+  padding-left:5px;
+  padding-right:5px;
+  background: #032f3a;
+  color: #08abb0;
+  border-radius: 4px;
+}
+
+.messageEdit {
+  margin-top: 5px;
+  padding-left:5px;
+  padding-right:5px;
+  background: #032f3a;
+  color: #08abb0;
+  border-radius: 4px;
+}
+
+.profileImageChoice {
+  border-style: solid;
+  border-width: 3px;
+  border-color: #032f3a;
+  background-color: #032f3a;
+  cursor: pointer;
+}
+
 .regenerateButton {
   font-size: 25px;
   /* background: #141417; */
