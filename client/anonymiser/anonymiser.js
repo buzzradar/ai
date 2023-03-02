@@ -1,14 +1,14 @@
 import { debounce } from "lodash";
 import { chart } from "./assets/tweets.json";
-const version = "0.0.2";
+const version = "0.0.3";
 
 var server = "http";
 
-// if (process.env.NODE_ENV == "development") {
+if (process.env.NODE_ENV == "development") {
 	server += "://localhost:7347/";
-// } else {
-	// server += "s://ai-gmed.onrender.com/";
-// }
+} else {
+	server += "s://ai-gmed.onrender.com/";
+}
 
 console.log("%c anonymiser version: " + version + " ", "background:#93f035;", "server API:", server);
 
@@ -238,11 +238,11 @@ function getRegeneratedTweetView(tweetRegenerate_ROW) {
 	</div>`;
 
 	div.querySelector(".fullNameEdit").addEventListener("input", (e) => {
-		updateProfileNames("fullName", tweetRegenerate_ROW.original_OBJ.username, e.target.textContent);
+		updateProfileNames("fullNameEdit", tweetRegenerate_ROW.original_OBJ.username, e.target.textContent);
 	});
 
 	div.querySelector(".userNameEdit").addEventListener("input", (e) => {
-		updateProfileNames("userName", tweetRegenerate_ROW.original_OBJ.username, e.target.textContent);
+		updateProfileNames("userNameEdit", tweetRegenerate_ROW.original_OBJ.username, e.target.textContent);
 	});
 
 	div.querySelector(".messageEdit").addEventListener("input", (e) => {
@@ -261,6 +261,9 @@ function getRegeneratedTweetView(tweetRegenerate_ROW) {
 }
 
 function updateProfileNames(keyType, originalUserName, newName) {
+
+	console.log ("%c ➜ ", "background:#00FFbc;", "keyType:", keyType);
+
 	var { profile_OBJ } = getAnonymisedByOriginalUserName(originalUserName);
 
 	profile_OBJ[keyType] = newName;
