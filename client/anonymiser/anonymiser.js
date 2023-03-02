@@ -4,11 +4,11 @@ const version = "0.0.2";
 
 var server = "http";
 
-if (process.env.NODE_ENV == "development") {
-	server += "://localhost:7347/";
-} else {
+// if (process.env.NODE_ENV == "development") {
+// 	server += "://localhost:7347/";
+// } else {
 	server += "s://ai-gmed.onrender.com/";
-}
+// }
 
 console.log("%c anonymiser version: " + version + " ", "background:#93f035;", "server API:", server);
 

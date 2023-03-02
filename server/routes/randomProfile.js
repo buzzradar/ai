@@ -28,11 +28,13 @@ router.post("/", async (req, res) => {
 	const order = "random";
 
 	// var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
-	var url = genPhotosURL + "heinz" + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
+	var url = genPhotosURL + "heinzi" + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
 
 	try {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 		let { error } = ranProfile_OBJ.genFaces;
+
+		console.log ("error uh?", error);
 
 		if (error) {
 			res.status(200).send({ status: error, statusText: error, error: "generated.photos" });
