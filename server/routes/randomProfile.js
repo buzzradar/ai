@@ -34,6 +34,8 @@ router.post("/", async (req, res) => {
 	try {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 
+		console.log ("geFaces:", ranProfile_OBJ.genFaces);
+
 		res.status(200).send(ranProfile_OBJ);
 	} catch (error) {
 		let status = 500;
@@ -53,6 +55,8 @@ router.post("/", async (req, res) => {
 
 async function getGenPhoto(url) {
 	// Default options are marked with *
+	
+	console.log ("fetch", url);
 	var response = await fetch(url, {
 		method: "GET", // *GET, POST, PUT, DELETE, etc.
 		// mode: "cors", // no-cors, *cors, same-origin
@@ -73,6 +77,7 @@ async function getGenPhoto(url) {
 			return { error: false, data: jsondata };
 		})
 		.catch((error) => {
+			console.log ("error here?", error);
 			return { error: error, data: null };
 		})
 		.finally((e) => {
