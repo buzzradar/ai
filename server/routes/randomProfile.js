@@ -27,17 +27,19 @@ router.post("/", async (req, res) => {
 	const age = lodash.sample(["adult", "young-adult"]);
 	const order = "random";
 
-	var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
+	var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `ZZ&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
 
 	try {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 		let { error } = ranProfile_OBJ.genFaces;
 
-		console.log ("error uh?", error);
+		console.log ("uh error:", error);
 
 		if (error) {
+			console.log ("uh oh error:", error);
 			res.status(200).send({ status: error, statusText: error, error: "generated.photos" });
 		} else {
+			console.log ("yeah good:", error);
 			res.status(200).send(ranProfile_OBJ);
 		}
 	} catch (error) {
@@ -52,6 +54,8 @@ router.post("/", async (req, res) => {
 		// 	console.log(error);
 		// }
 
+		console.log ("unknown problem");
+
 		res.status(status).send({ status: status, statusText: statusText, error: error });
 	}
 });
@@ -62,7 +66,7 @@ async function getGenPhoto(url) {
 	console.log("fetch", url);
 	var response = await fetch(url, {
 		method: "GET", // *GET, POST, PUT, DELETE, etc.
-		// mode: "cors", // no-cors, *cors, same-origin
+		mode: "cors", // no-cors, *cors, same-origin
 		// cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
 		// credentials: "same-origin", // include, *same-origin, omit
 		// headers: {
@@ -89,8 +93,10 @@ async function getGenPhoto(url) {
 	var { error } = response.data;
 	if (error) {
 		response.error = response.data.error;
-		console.log("error genPhotos:", error);
+		console.log("hi error genPhotos:", error);
 	}
+
+	console.log("hi response:", response);
 
 	return response;
 }
