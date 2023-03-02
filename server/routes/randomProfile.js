@@ -109,13 +109,13 @@ var getRandomProfile = (type) => {
 
 	switch (lodash.random(0, 8)) {
 		case 0:
-			userName = name.toLowerCase();
+			userName = name.toLowerCase() + lodash.random(2, 100);
 			break;
 		case 1:
-			userName = surName.toLowerCase();
+			userName = surName.toLowerCase() + lodash.random(2, 100);
 			break;
 		case 2:
-			userName = name.toLowerCase() + surName;
+			userName = name.toLowerCase() + surName + lodash.random(2, 10);
 			break;
 		case 3:
 			userName = name.toLowerCase() + surName.charAt(0);
@@ -137,7 +137,7 @@ var getRandomProfile = (type) => {
 			break;
 	}
 
-	if (!lodash.random(0, 2)) userName += lodash.random(2, 1000);
+	if (!lodash.random(0, 2)) userName += lodash.random(2, 10);
 
 	return {
 		type: type,
