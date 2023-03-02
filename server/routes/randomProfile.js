@@ -1,5 +1,6 @@
 import express from "express";
 import lodash from "lodash";
+import fetch from "node-fetch";
 // import namesFemale from "../assets/names-female.json";
 // import namesMale from "../assets/names-male.json";
 // import namesSurnames from "../assets/names-surnames.json";
@@ -63,7 +64,7 @@ router.post("/", async (req, res) => {
 async function getGenPhoto(url) {
 	// Default options are marked with *
 
-	console.log("fetch", url);
+	console.log("fetchi fetch", url);
 	var response = await fetch(url, {
 		method: "GET", // *GET, POST, PUT, DELETE, etc.
 		// mode: "cors", // no-cors, *cors, same-origin
