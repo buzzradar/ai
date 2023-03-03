@@ -105,6 +105,7 @@ async function fetchOpenAI(userPrompt) {
 		},
 		body: JSON.stringify({
 			prompt: userPrompt,
+			model: "text-davinci-003",
 		}),
 	});
 
