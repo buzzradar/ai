@@ -34,13 +34,13 @@ router.post("/", async (req, res) => {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 		let { error } = ranProfile_OBJ.genFaces;
 
-		console.log ("uh error:", error);
+		console.log("uh error:", error);
 
 		if (error) {
-			console.log ("uh oh error:", error);
+			console.log("uh oh error:", error);
 			res.status(200).send({ status: error, statusText: error, error: "generated.photos" });
 		} else {
-			console.log ("yeah good:", error);
+			console.log("yeah good:", error);
 			res.status(200).send(ranProfile_OBJ);
 		}
 	} catch (error) {
@@ -55,7 +55,7 @@ router.post("/", async (req, res) => {
 		// 	console.log(error);
 		// }
 
-		console.log ("tried and catch error:", error);
+		console.log("tried and catch error:", error);
 
 		res.status(200).send({ status: status, statusText: statusText, error: error, jeff: "jeff" });
 	}
@@ -89,13 +89,12 @@ async function getGenPhoto(url) {
 		});
 
 	console.log("the response:", response);
-	
+
 	var { error } = response.data;
 	if (error) {
 		response.error = response.data.error;
 		console.log("hi error genPhotos:", error);
 	}
-
 
 	return response;
 }
