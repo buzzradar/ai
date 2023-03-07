@@ -87,13 +87,13 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	if (!tweetRegenerate_ROW.regenerated_VIEW) tweetRegenerate_ROW.regenerated_VIEW = getRegeneratedTweetView(tweetRegenerate_ROW);
 
 	// TODO: figure out if we already have anonymised profile from previous session in db
-	const { username: originalUserName } = tweetRegenerate_ROW.original_OBJ;
+	const { username: originalUserName, profileImageURL } = tweetRegenerate_ROW.original_OBJ;
 	var anonymisedProfile_OBJ = getAnonymisedByOriginalUserName(originalUserName);
 
 	if (anonymisedProfile_OBJ) {
 		console.log("%c ➜ ", "background:#93f035;", "yeah we already have anonymised profile:", anonymisedProfile_OBJ);
 	} else {
-		let aProfile_OBJ = await getRegeneratedProfile();
+		let aProfile_OBJ = await getRegeneratedProfile(profileImageURL);
 		aProfile_OBJ.imageIndex = 0;
 		aProfile_OBJ.fullName = aProfile_OBJ.name + " " + aProfile_OBJ.surName;
 		anonymisedProfile_OBJ = { originalUserName: originalUserName, profile_OBJ: aProfile_OBJ };
@@ -138,6 +138,7 @@ async function getOpenAiRephrasedMessage() {
 		},
 		body: JSON.stringify({
 			hashtagToEndOfString: true, // if true we move hashtag to end of sentence as we've seen empty strings returned
+			removeURLs:true, // if true we remove any URLs from the string
 			replaceHandles: "handle", // if specified we replace handles with this string
 			model: "text-davinci-003",
 			max_tokens: 500,
@@ -167,17 +168,18 @@ async function getOpenAiRephrasedMessage() {
 	};
 }
 
-async function getRegeneratedProfile() {
+async function getRegeneratedProfile(profileImageURL) {
 	var response_JSON,
 		error,
 		ranProfile_OBJ = null;
-	var response = await fetch(server + "randomProfile", {
+	var response = await fetch(server + "anonProfile", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
 		},
 		body: JSON.stringify({
 			type: null, // "female" or "male" if not specified returns random female or male
+			profileImageUrl: profileImageURL, // if specified tries to retrieve profile image from this url
 		}),
 	});
 
@@ -261,8 +263,7 @@ function getRegeneratedTweetView(tweetRegenerate_ROW) {
 }
 
 function updateProfileNames(keyType, originalUserName, newName) {
-
-	console.log ("%c ➜ ", "background:#00FFbc;", "keyType:", keyType);
+	console.log("%c ➜ ", "background:#00FFbc;", "keyType:", keyType);
 
 	var { profile_OBJ } = getAnonymisedByOriginalUserName(originalUserName);
 

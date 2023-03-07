@@ -1,61 +1,37 @@
-
 import express from "express";
-const router = express.Router();
-import { googleVision } from "@google-cloud/vision";
-//import lunarArcJSON from '../apiKeys/lunar-arc-378014-d3455e8e0581.json' assert { type: "json" };
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 
+var router = express.Router();
 // console.log("GOOGLE KEY CHECK....");
-// console.log(process.env.GOOGLE_CLOUD_KEY);
+// console.log(process.env.GOOGLE_CLOUD_BUZZ_KEY);
 
-// Creates a client
-const vision = new googleVision({
-    credentials: JSON.parse(process.env.GOOGLE_CLOUD_BUZZ_KEY)
+var gVisionClient = new ImageAnnotatorClient({
+	credentials: JSON.parse(process.env.GOOGLE_CLOUD_BUZZ_KEY),
 });
 
-const client = new vision.ImageAnnotatorClient();
-
 // Define a POST route that analyzes the sentiment of a text
-router.post('/', async (req, res) => {
-    
-    try {
-        const document = {
-            content: req.body.copyToAnalyse,
-            type: 'PLAIN_TEXT',
-        };
+router.post("/", async (req, res) => {
 
-        // The encoding type of the text, default is UTF8
-        const encodingType = 'UTF8';
+	// https://cloud.google.com/vision/docs/reference/rest/v1/AnnotateImageResponse#Likelihood
 
-        // The features to extract from the text
-        const features = {
-            extractSyntax: false,
-            extractEntities: false,
-            extractDocumentSentiment: true,
-            extractEntitySentiment: true,
-            classifyText: true,
-        };
+	try {
+		// var [result] = await gVisionClient.labelDetection("./testAssets/testImage.jpeg");
+		var [result] = await gVisionClient.labelDetection("https://pbs.twimg.com/profile_images/1562026991741812737/41K8x-B2.jpg");
+        // var [result] = await gVisionClient.faceDetection("https://pbs.twimg.com/profile_images/1562026991741812737/41K8x-B2.jpg");
+        console.log ("result:", result);
 
-        const [result] = await client.annotateText({
-            document: {content: document.content, type: 'PLAIN_TEXT', language: 'en'}, 
-            features: features, 
-            encodingType: encodingType
-        });
+		var labels = result.labelAnnotations;
+		console.log("Labels:");
+		labels.forEach((label) => console.log(label.description));
 
+		res.status(200).json({
+			result: result,
+		});
 
-        res.status(200).json({
-            result: result,
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'ERROR: ' + err });
-    }
-
+	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: "ERROR: " + err });
+	}
 });
 
 export default router;
-
-
-
-
-

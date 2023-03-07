@@ -1,9 +1,8 @@
 import express from "express";
 import lodash from "lodash";
 import fetch from "node-fetch";
-// import namesFemale from "../assets/names-female.json";
-// import namesMale from "../assets/names-male.json";
-// import namesSurnames from "../assets/names-surnames.json";
+import chalk from "chalk";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 
 import { createRequire } from "node:module";
 var require = createRequire(import.meta.url);
@@ -15,32 +14,55 @@ var namesSurnames = require("../assets/names-surnames.json");
 const router = express.Router();
 const genPhotosURL = "https://api.generated.photos/api/v1/faces?api_key=";
 
+var gVisionClient = new ImageAnnotatorClient({
+	credentials: JSON.parse(process.env.GOOGLE_CLOUD_BUZZ_KEY),
+});
+
 router.post("/", async (req, res) => {
-	const { type } = req.body; // female or male if not specified, random
+	const { type, profileImageUrl } = req.body; // female or male if not specified, random
 
-	console.log("we want type:", type);
+	console.log(chalk.inverse(" ➜ get anon profile "), "👻", chalk.inverse(" ! "));
+	console.log(chalk.inverse(" type: "), chalk.magentaBright(type));
+	console.log(chalk.inverse(" profileImageUrl: "), chalk.magentaBright(profileImageUrl));
+	console.log(" ");
 
-	let ranProfile_OBJ = getRandomProfile(type);
+	var profileImageLabels = {
+		age: ["adult", "young-adult"],
+	};
+
+	var emotion = "neutral";
+
+	if (profileImageUrl) {
+		let gVisionProfileFace = await getGoogleVision(profileImageUrl);
+
+		console.log(chalk.cyan("gVisionProfileFace:"), gVisionProfileFace);
+		if (isPositive(gVisionProfileFace.surpriseLikelihood)) emotion = "surprise";
+		if (isPositive(gVisionProfileFace.joyLikelihood)) emotion = "joy";
+
+		console.log(chalk.cyan("emotion:"), emotion);
+	}
+
+	var ranProfile_OBJ = getRandomProfile(type);
 
 	// * options for generated.photos: https://generated.photos/account#apikey
 	const page = "1";
 	const per_page = "6";
-	const age = lodash.sample(["adult", "young-adult"]);
+	const age = lodash.sample(profileImageLabels.age);
 	const order = "random";
 
-	var url = genPhotosURL + process.env.GPHOTOS_API_KEY + `&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&order_by=${order}`;
+	var url =
+		genPhotosURL +
+		process.env.GPHOTOS_API_KEY +
+		`&page=${page}&per_page=${per_page}&gender=${ranProfile_OBJ.type}&age=${age}&emotion=${emotion}&order_by=${order}`;
 
 	try {
 		ranProfile_OBJ.genFaces = await getGenPhoto(url);
 		let { error } = ranProfile_OBJ.genFaces;
 
-		console.log("uh error:", error);
-
 		if (error) {
 			console.log("uh oh error:", error);
 			res.status(200).send({ status: error, statusText: error, error: "generated.photos" });
 		} else {
-			console.log("yeah good:", error);
 			res.status(200).send(ranProfile_OBJ);
 		}
 	} catch (error) {
@@ -61,10 +83,48 @@ router.post("/", async (req, res) => {
 	}
 });
 
+var isPositive = (likelihood) => {
+	if (likelihood == "VERY_LIKELY" || likelihood == "LIKELY") {
+		// https://cloud.google.com/vision/docs/reference/rest/v1/AnnotateImageResponse#Likelihood
+		return true;
+	} else {
+		return false;
+	}
+};
+
+async function getGoogleVision(profileImageUrl) {
+	var profileFace = {
+		joyLikelihood: "VERY_UNLIKELY",
+		surpriseLikelihood: "VERY_UNLIKELY",
+	};
+
+	// var [resultLabel] = await gVisionClient.labelDetection(profileImageUrl);
+
+	// var labels = resultLabel.labelAnnotations;
+	// console.log(chalk.bgBlackBright("[gVision labelDetection]"));
+	// labels.forEach((label, i) => console.log(chalk.yellowBright(`[${i + 1}] ${label.description}`)));
+
+	try {
+		var [resultFace] = await gVisionClient.faceDetection(profileImageUrl);
+		var [face] = resultFace.faceAnnotations; // https://cloud.google.com/vision/docs/reference/rest/v1/AnnotateImageResponse#Likelihood
+
+		if (face) {
+			profileFace.joyLikelihood = face.joyLikelihood;
+			profileFace.surpriseLikelihood = face.surpriseLikelihood;
+		} else {
+			console.log(chalk.cyan("google vision no face detected"));
+		}
+	} catch (err) {
+		console.error(err);
+	}
+
+	return profileFace;
+}
+
 async function getGenPhoto(url) {
 	// Default options are marked with *
 
-	console.log("fetchi fetch", url);
+	console.log("fetch genPhoto", url);
 	var response = await fetch(url, {
 		method: "GET", // *GET, POST, PUT, DELETE, etc.
 		// mode: "cors", // no-cors, *cors, same-origin
@@ -88,7 +148,7 @@ async function getGenPhoto(url) {
 			return { error: error, data: null };
 		});
 
-	console.log("the response:", response);
+	// console.log("the response:", response);
 
 	var { error } = response.data;
 	if (error) {
