@@ -3,7 +3,8 @@ import * as dotenv from "dotenv";
 import cors from "cors";
 import openaiRouter from "./routes/openai.js";
 import cnlRouter from "./routes/cnl.js";
-import randomProfile from "./routes/randomProfile.js";
+import gVision from "./routes/googleVision.js";
+import anonProfile from "./routes/anonProfile.js";
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const version = "0.0.4k";
+const version = "0.0.5";
 
 app.get("/", async (req, res) => {
 	res.status(200).send({
@@ -19,9 +20,9 @@ app.get("/", async (req, res) => {
 	});
 });
 
-
-app.use ("/cnl", cnlRouter);
-app.use ("/randomProfile", randomProfile);
-app.use ("/openai", openaiRouter);
+app.use("/cnl", cnlRouter);
+app.use("/anonProfile", anonProfile);
+app.use("/openai", openaiRouter);
+app.use("/gVision", gVision);
 
 app.listen(7347, () => console.log("AI server started on http://localhost:7347"));
