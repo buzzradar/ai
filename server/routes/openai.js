@@ -21,23 +21,23 @@ router.post("/", async (req, res) => {
 		if (content == undefined) content = null;
 		if (hashtagToEndOfString == undefined) hashtagToEndOfString = false; // if true we move hashtag to end of sentence as we've seen empty strings returned
 
-		console.log(chalk.inverse(" ➜ open ai "), "🍔", chalk.inverse(" ! "));
-		console.log(chalk.inverse(" model: "), chalk.magentaBright(model));
-		console.log(chalk.inverse(" max_tokens: "), chalk.magentaBright(max_tokens));
-		console.log(chalk.inverse(" removeURLs: "), chalk.magentaBright(removeURLs));
-		console.log(chalk.inverse(" hashtagToEndOfString: "), chalk.magentaBright(hashtagToEndOfString));
-		console.log(chalk.inverse(" prompt: "), chalk.magentaBright(prompt));
-		console.log(chalk.inverse(" content: "), chalk.magentaBright(content));
+		console.log("🍔", chalk.inverse(" ➜ "), chalk.magentaBright("open ai! "));
+		console.log(chalk.inverse(" model:"), chalk.magentaBright(model));
+		console.log(chalk.inverse(" max_tokens:"), chalk.magentaBright(max_tokens));
+		console.log(chalk.inverse(" removeURLs:"), chalk.magentaBright(removeURLs));
+		console.log(chalk.inverse(" hashtagToEndOfString:"), chalk.magentaBright(hashtagToEndOfString));
+		console.log(chalk.inverse(" prompt:"), chalk.magentaBright(prompt));
+		console.log(chalk.inverse(" content:"), chalk.magentaBright(content));
 		console.log(" ");
 
 		if (content) {
+			// if we get content we marry up, otherwise we just use prompt
+			// * we need this as when we get a hashtag first sometimes we can empty string back
 			if (hashtagToEndOfString) content = moveHashtagToEndOfString(content);
 			if (removeURLs) content = removeThoseURLs(content);
 			if (replaceHandles) content = replaceTheHandles(replaceHandles, content);
 			prompt = prompt + "\n\n" + content;
 		}
-
-		console.log ("primpt:", prompt);
 
 		var response = await openai.createCompletion({
 			model: model,

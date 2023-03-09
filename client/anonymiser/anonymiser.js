@@ -87,13 +87,14 @@ async function regenerateTweet(tweetRegenerate_ROW) {
 	if (!tweetRegenerate_ROW.regenerated_VIEW) tweetRegenerate_ROW.regenerated_VIEW = getRegeneratedTweetView(tweetRegenerate_ROW);
 
 	// TODO: figure out if we already have anonymised profile from previous session in db
-	const { username: originalUserName, profileImageURL } = tweetRegenerate_ROW.original_OBJ;
+	const { username: originalUserName, profileImageURL, name } = tweetRegenerate_ROW.original_OBJ;
+
 	var anonymisedProfile_OBJ = getAnonymisedByOriginalUserName(originalUserName);
 
 	if (anonymisedProfile_OBJ) {
 		console.log("%c ➜ ", "background:#93f035;", "yeah we already have anonymised profile:", anonymisedProfile_OBJ);
 	} else {
-		let aProfile_OBJ = await getRegeneratedProfile(profileImageURL);
+		let aProfile_OBJ = await getRegeneratedProfile(originalUserName, profileImageURL, name);
 		aProfile_OBJ.imageIndex = 0;
 		aProfile_OBJ.fullName = aProfile_OBJ.name + " " + aProfile_OBJ.surName;
 		anonymisedProfile_OBJ = { originalUserName: originalUserName, profile_OBJ: aProfile_OBJ };
@@ -168,7 +169,7 @@ async function getOpenAiRephrasedMessage() {
 	};
 }
 
-async function getRegeneratedProfile(profileImageURL) {
+async function getRegeneratedProfile(originalUserName, profileImageURL, name) {
 	var response_JSON,
 		error,
 		ranProfile_OBJ = null;
@@ -180,6 +181,8 @@ async function getRegeneratedProfile(profileImageURL) {
 		body: JSON.stringify({
 			type: null, // "female" or "male" if not specified returns random female or male
 			profileImageUrl: profileImageURL, // if specified tries to retrieve profile image from this url
+			originalUserName: originalUserName, // if specified will return previously generated profile for this username if available
+			name:name // tries to detect if male or female profile if type is unspecified
 		}),
 	});
 

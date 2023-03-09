@@ -19,12 +19,29 @@ var gVisionClient = new ImageAnnotatorClient({
 });
 
 router.post("/", async (req, res) => {
-	const { type, profileImageUrl } = req.body; // female or male if not specified, random
+	var { type, profileImageUrl, originalUserName, name } = req.body; // female or male if not specified, random
 
-	console.log(chalk.inverse(" ➜ get anon profile "), "👻", chalk.inverse(" ! "));
-	console.log(chalk.inverse(" type: "), chalk.magentaBright(type));
-	console.log(chalk.inverse(" profileImageUrl: "), chalk.magentaBright(profileImageUrl));
+	console.log("👻", chalk.inverse(" ➜ "), chalk.cyanBright("get anon profile! "));
+	console.log(chalk.inverse(" originalUserName:"), chalk.cyanBright(originalUserName));
+	console.log(chalk.inverse(" name:"), chalk.cyanBright(name));
+	console.log(chalk.inverse(" type:"), chalk.cyanBright(type));
+	console.log(chalk.inverse(" profileImageUrl:"), chalk.cyanBright(profileImageUrl));
 	console.log(" ");
+
+	var nameFoundInList = false;
+
+	if (!type && name) {
+		// if no type specified, but name is, then use name to determine type
+		let checkName = name.split(" ")[0].split("-")[0].split("_")[0].toLowerCase();
+		let typeOfName = isInNamesList(checkName, namesFemale.data, "female");
+		if (!typeOfName) typeOfName = isInNamesList(checkName, namesMale.data, "male");
+		if (typeOfName) {
+			nameFoundInList = true;
+		} else {
+			console.log(chalk.red("name not found in names list:"), name);
+		}
+		type = typeOfName;
+	}
 
 	var profileImageLabels = {
 		age: ["adult", "young-adult"],
@@ -42,7 +59,7 @@ router.post("/", async (req, res) => {
 		console.log(chalk.cyan("emotion:"), emotion);
 	}
 
-	var ranProfile_OBJ = getRandomProfile(type);
+	var ranProfile_OBJ = getRandomProfile(type, nameFoundInList);
 
 	// * options for generated.photos: https://generated.photos/account#apikey
 	const page = "1";
@@ -82,6 +99,17 @@ router.post("/", async (req, res) => {
 		res.status(200).send({ status: status, statusText: statusText, error: error, jeff: "jeff" });
 	}
 });
+
+var isInNamesList = (nameCheck, namesList, typeOfName) => {
+	var type = null;
+	for (let name of namesList) {
+		if (name.toLowerCase() == nameCheck) {
+			type = typeOfName;
+			break;
+		}
+	}
+	return type;
+};
 
 var isPositive = (likelihood) => {
 	if (likelihood == "VERY_LIKELY" || likelihood == "LIKELY") {
@@ -159,7 +187,7 @@ async function getGenPhoto(url) {
 	return response;
 }
 
-var getRandomProfile = (type) => {
+var getRandomProfile = (type, nameFoundInList) => {
 	if (!type) {
 		if (lodash.random(0, 1)) {
 			type = "female";
@@ -220,6 +248,7 @@ var getRandomProfile = (type) => {
 		name: name,
 		surName: surName,
 		userName: userName,
+		nameFoundInList: nameFoundInList,
 	};
 };
 
