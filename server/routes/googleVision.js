@@ -5,9 +5,9 @@ var router = express.Router();
 // console.log("GOOGLE KEY CHECK....");
 // console.log(process.env.GOOGLE_CLOUD_BUZZ_KEY);
 
-var gVisionClient = new ImageAnnotatorClient({
-	credentials: JSON.parse(process.env.GOOGLE_CLOUD_BUZZ_KEY),
-});
+// var gVisionClient = new ImageAnnotatorClient({
+// 	credentials: JSON.parse(process.env.GOOGLE_CLOUD_BUZZ_KEY),
+// });
 
 // Define a POST route that analyzes the sentiment of a text
 router.post("/", async (req, res) => {

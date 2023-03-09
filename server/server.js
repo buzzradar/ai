@@ -12,7 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const version = "0.0.5";
+const version = "0.0.5a";
 
 app.get("/", async (req, res) => {
 	res.status(200).send({
@@ -26,3 +26,4 @@ app.use("/openai", openaiRouter);
 app.use("/gVision", gVision);
 
 app.listen(7347, () => console.log("AI server started on http://localhost:7347"));
+Ì

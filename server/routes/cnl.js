@@ -8,7 +8,7 @@ import { LanguageServiceClient } from "@google-cloud/language";
 
 // Creates a client
 const client = new LanguageServiceClient({
-    credentials: JSON.parse(process.env.GOOGLE_CLOUD_KEY)
+    credentials: JSON.parse(process.env.GOOGLE_CLOUD_BUZZ_KEY)
 });
 
 // Define a POST route that analyzes the sentiment of a text
