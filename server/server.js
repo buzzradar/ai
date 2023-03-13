@@ -5,6 +5,7 @@ import openaiRouter from "./routes/openai.js";
 import cnlRouter from "./routes/cnl.js";
 import gVision from "./routes/googleVision.js";
 import anonProfile from "./routes/anonProfile.js";
+import redis from "./routes/redis.js";
 
 dotenv.config();
 
@@ -12,7 +13,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const version = "0.0.5b";
+const version = "0.0.6";
 
 app.get("/", async (req, res) => {
 	res.status(200).send({
@@ -24,5 +25,6 @@ app.use("/cnl", cnlRouter);
 app.use("/anonProfile", anonProfile);
 app.use("/openai", openaiRouter);
 app.use("/gVision", gVision);
+app.use("/redish", redis);
 
 app.listen(7347, () => console.log("AI server started on http://localhost:7347"));

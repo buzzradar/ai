@@ -5,7 +5,8 @@ const version = "0.0.3";
 var server = "http";
 
 if (process.env.NODE_ENV == "development") {
-	server += "://localhost:7347/";
+	// server += "://localhost:7347/";
+	server += "s://ai-gmed.onrender.com/";
 } else {
 	server += "s://ai-gmed.onrender.com/";
 }
